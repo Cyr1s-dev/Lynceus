@@ -1,0 +1,777 @@
+tools:
+  - id: semgrep
+    name: Semgrep
+    domain: web_sast
+    description: Static application security scanner for source-code patterns.
+    upstream_url: https://github.com/semgrep/semgrep
+    executable_names: ["semgrep", "semgrep.exe"]
+    version_args: ["--version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: json
+    adapter_status: implemented
+    risk_notes:
+      - Rule matches require evidence review before confirmed vulnerability claims.
+    install:
+      method: pip
+      package: semgrep==1.172.0
+      version: 1.172.0
+    invocation:
+      params:
+        - key: config
+          kind: string
+          flag: "--config"
+          default: auto
+          required: false
+          description: Semgrep ruleset id or local rule path (default "auto").
+        - key: include
+          kind: string_list
+          flag: "--include"
+          description: Glob patterns restricting scanned files.
+        - key: exclude
+          kind: string_list
+          flag: "--exclude"
+          description: Glob patterns skipping scanned files.
+        - key: timeout_seconds
+          kind: integer
+          default: 120
+          minimum: 1
+          description: Wall-clock cap for the scan in seconds.
+      env_keys:
+        - name: SEMGREP_APP_TOKEN
+          description: Semgrep App token unlocking pro registries (optional).
+  - id: nuclei
+    name: Nuclei
+    domain: web_dast
+    description: Template-based DAST scanner for web and network services.
+    upstream_url: https://github.com/projectdiscovery/nuclei
+    executable_names: ["nuclei", "nuclei.exe"]
+    version_args: ["-version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: jsonl
+    adapter_status: implemented
+    risk_notes:
+      - Template execution must be scoped and rate-limited.
+    install:
+      method: github_release
+      repository: projectdiscovery/nuclei
+      release_tag: v3.11.1
+      asset_patterns:
+        windows_amd64: "^nuclei_.*_windows_amd64\\.zip$"
+        linux_amd64: "^nuclei_.*_linux_amd64\\.zip$"
+        linux_arm64: "^nuclei_.*_linux_arm64\\.zip$"
+        darwin_amd64: "^nuclei_.*_macOS_amd64\\.zip$"
+        darwin_arm64: "^nuclei_.*_macOS_arm64\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "bb6cb9ff8939b753f6fcab06fd30a15f5bc61d8382a597871334c007a85ff9d2"
+        linux_amd64: "ea63d4ae232808cd7c6bc00d0142428e231fab59dae01042246097d195835ab6"
+        linux_arm64: "8044e3d9768ba0a744b2872c1a87e813006f013da97ca9f50f7661a4203bec07"
+        darwin_amd64: "75c47ce11e9dbd4288a1c895ed85e3c4df9f4acb8237d6d178da6dccd1628f2a"
+        darwin_arm64: "7d7e291addd1fc29a9bf8d089afe878a9799b20229cbea2fb1693fc40fd4c5f0"
+    target_flag: ["-u"]
+    invocation:
+      params:
+        - key: templates
+          kind: string_list
+          flag: "-templates"
+          description: Template directories or single template files to run.
+        - key: severity
+          kind: string_list
+          flag: "-severity"
+          description: Severities to include (info, low, medium, high, critical).
+        - key: tags
+          kind: string_list
+          flag: "-tags"
+          description: Execute only templates tagged with these tags.
+        - key: exclude_tags
+          kind: string_list
+          flag: "-exclude-tags"
+          description: Skip templates tagged with these tags.
+        - key: rate_limit
+          kind: integer
+          flag: "-rate-limit"
+          minimum: 1
+          description: Maximum requests per second.
+        - key: retries
+          kind: integer
+          flag: "-retries"
+          minimum: 0
+          description: Number of times to retry a failed request.
+        - key: headless
+          kind: boolean
+          flag: "-headless"
+          description: Enable headless browser based template execution.
+        - key: timeout_seconds
+          kind: integer
+          default: 300
+          minimum: 1
+          description: Wall-clock cap for the scan in seconds.
+  - id: subfinder
+    name: Subfinder
+    domain: asset_recon
+    description: Passive subdomain discovery tool for asset reconnaissance.
+    upstream_url: https://github.com/projectdiscovery/subfinder
+    executable_names: ["subfinder", "subfinder.exe"]
+    version_args: ["-version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: jsonl
+    adapter_status: implemented
+    risk_notes:
+      - Passive recon results require reachability validation.
+    install:
+      method: github_release
+      repository: projectdiscovery/subfinder
+      release_tag: v2.15.0
+      asset_patterns:
+        windows_amd64: "^subfinder_.*_windows_amd64\\.zip$"
+        linux_amd64: "^subfinder_.*_linux_amd64\\.zip$"
+        linux_arm64: "^subfinder_.*_linux_arm64\\.zip$"
+        darwin_amd64: "^subfinder_.*_macOS_amd64\\.zip$"
+        darwin_arm64: "^subfinder_.*_macOS_arm64\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "37fca8541b4cb9e2a9b542a94defd671a9fd2f6003b2cc64c38d20c736b28be4"
+        linux_amd64: "ce7372c58f25facbbb036c821a6336df2b4017891257f1455cd8d00d704d5862"
+        linux_arm64: "73a5fe3ee55205e8bf6fee57c7af29048f664c0d2b2f69d592b6b5c22bfc1f5a"
+        darwin_amd64: "c9f51b0adfa77fd7f0452b7cec7cb0ac71aa6e745920a829d7b5498cb942786c"
+        darwin_arm64: "92e003a9b3628377b9a05536de58146d3e1af56494ae9f0761449d3e19d54337"
+    target_flag: ["-d"]
+    output_flags: ["-json", "-o", "-"]
+    invocation:
+      params:
+        - key: provider_config
+          kind: path
+          flag: "-provider-config"
+          description: >-
+            Path to a subfinder provider-config.yaml; reference injected env
+            keys with $VAR_NAME placeholders (e.g. shodan: [$SHODAN_API_KEY]).
+      env_keys:
+        - name: SHODAN_API_KEY
+          description: Shodan passive source API key.
+        - name: CHAOS_API_KEY
+          description: ProjectDiscovery Chaos passive source API key.
+        - name: VIRUSTOTAL_API_KEY
+          description: VirusTotal passive source API key.
+        - name: SECURITYTRAILS_API_KEY
+          description: SecurityTrails passive source API key.
+        - name: CENSYS_API_ID
+          description: Censys API ID (pair with CENSYS_API_SECRET).
+        - name: CENSYS_API_SECRET
+          description: Censys API secret (pair with CENSYS_API_ID).
+        - name: GITHUB_TOKEN
+          description: GitHub token for the github passive source.
+        - name: FOFA_EMAIL
+          description: Fofa account email (pair with FOFA_KEY).
+        - name: FOFA_KEY
+          description: Fofa API key (pair with FOFA_EMAIL).
+        - name: HUNTER_API_KEY
+          description: Hunter (Qianxin) passive source API key.
+        - name: QUAKE_TOKEN
+          description: 360 Quake passive source API token.
+        - name: ZOOMEYE_API_KEY
+          description: ZoomEye passive source API key.
+  - id: naabu
+    name: Naabu
+    domain: asset_recon
+    description: Fast port scanner for asset reconnaissance.
+    upstream_url: https://github.com/projectdiscovery/naabu
+    executable_names: ["naabu", "naabu.exe"]
+    version_args: ["-version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: jsonl
+    adapter_status: implemented
+    risk_notes:
+      - Port scanning must respect scope and rate limits.
+    install:
+      method: github_release
+      repository: projectdiscovery/naabu
+      release_tag: v2.6.1
+      asset_patterns:
+        windows_amd64: "^naabu_.*_windows_amd64\\.zip$"
+        linux_amd64: "^naabu_.*_linux_amd64\\.zip$"
+        linux_arm64: "^naabu_.*_linux_arm64\\.zip$"
+        darwin_amd64: "^naabu_.*_macOS_amd64\\.zip$"
+        darwin_arm64: "^naabu_.*_macOS_arm64\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "4efaa341f36a0c6e676164f75e2d93d5a72f4090d690fd1bc293f5a4b79c202b"
+        linux_amd64: "018c4c9884dea971eda860435ede3021d1150732f34cfd245498c6726d8cab90"
+        linux_arm64: "3adc2bb2395c3efff89623499b20eea66ef54924c485d3ae86762393a31736ea"
+        darwin_amd64: "b26e2d7fb91b833ac38cb7abb810cb8af6e7f6489a1c298cb63e584cd1f890a2"
+        darwin_arm64: "2f3a100210ddd42d8cf49ae30210c9823488b4687e2b7a869ab0ffc64b26cfba"
+      note: Requires Npcap on Windows for raw packet mode.
+    target_flag: ["-host"]
+    output_flags: ["-json"]
+    invocation:
+      params:
+        - key: ports
+          kind: string
+          flag: "-p"
+          default: top-100
+          description: Port selection (top-100, ranges, or comma separated list).
+        - key: rate
+          kind: integer
+          flag: "-rate"
+          default: 1000
+          minimum: 1
+          description: Packets per second sent during the scan.
+  - id: httpx
+    name: Httpx
+    domain: asset_recon
+    description: HTTP probing toolkit for titles, status codes, and technology hints.
+    upstream_url: https://github.com/projectdiscovery/httpx
+    executable_names: ["httpx", "httpx.exe"]
+    version_args: ["-version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: jsonl
+    adapter_status: implemented
+    risk_notes:
+      - Probe volume should be bounded for large asset sets.
+    install:
+      method: github_release
+      repository: projectdiscovery/httpx
+      release_tag: v1.10.0
+      asset_patterns:
+        windows_amd64: "^httpx_.*_windows_amd64\\.zip$"
+        linux_amd64: "^httpx_.*_linux_amd64\\.zip$"
+        linux_arm64: "^httpx_.*_linux_arm64\\.zip$"
+        darwin_amd64: "^httpx_.*_macOS_amd64\\.zip$"
+        darwin_arm64: "^httpx_.*_macOS_arm64\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "5b157473d301a289e6c7c33e31130db019f9ea51e112cff509bc60eb9c2072ba"
+        linux_amd64: "63eac4dcd6e5c9867c94765fdaaf66e7b4eeae3474a1f06e600e266a1c81a53e"
+        linux_arm64: "7f3eaf5a6839504f5e2ce29c3ce94aa2ddeeaa7619d9a497e017232c6dc49b1c"
+        darwin_amd64: "10cf5787279d5e2560732417ac2ed347eca73513aee107e6f79f3f79ff85bbe5"
+        darwin_arm64: "5c4a57c465ff3235bd997d92a43e488b027bce1ddbc71fe171949cd8398cf0f4"
+      note: ProjectDiscovery httpx; do not confuse with the Python httpx client CLI.
+    target_flag: ["-u"]
+    output_flags: ["-json"]
+    invocation:
+      params:
+        - key: title
+          kind: boolean
+          flag: "-title"
+          default: true
+          description: Include page titles in probe output.
+        - key: tech_detect
+          kind: boolean
+          flag: "-tech-detect"
+          default: true
+          description: Include technology fingerprint detection.
+        - key: status_code
+          kind: boolean
+          flag: "-status-code"
+          default: true
+          description: Include HTTP status codes in probe output.
+  - id: katana
+    name: Katana
+    domain: web_recon
+    description: Web crawler for endpoint, route, and JavaScript discovery.
+    upstream_url: https://github.com/projectdiscovery/katana
+    executable_names: ["katana", "katana.exe"]
+    version_args: ["-version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: jsonl
+    adapter_status: implemented
+    risk_notes:
+      - Crawling must be scoped to avoid unintended targets.
+    install:
+      method: github_release
+      repository: projectdiscovery/katana
+      release_tag: v1.7.0
+      asset_patterns:
+        windows_amd64: "^katana_.*_windows_amd64\\.zip$"
+        linux_amd64: "^katana_.*_linux_amd64\\.zip$"
+        linux_arm64: "^katana_.*_linux_arm64\\.zip$"
+        darwin_amd64: "^katana_.*_macOS_amd64\\.zip$"
+        darwin_arm64: "^katana_.*_macOS_arm64\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "8d9632f95dfeae3bd6847971dbf6bef18f395056236fe7e43499d46b9789d278"
+        linux_amd64: "fe1142d92f418549338ea46d67a472124878482e225d279e9a42700c75d76a4d"
+        linux_arm64: "9a6885fe9fda850129b110e0f079d42529b0693dd81b59c316f04084935300f0"
+        darwin_amd64: "9f31528eb3e1745d5fc1b99c8ec7420ff47e1b00ec637ced3e92dd82f5541816"
+        darwin_arm64: "609bff6752de7d0ebad6ba4d1f90fffe60f2052fa345d5890c60f3d928b7460a"
+    target_flag: ["-u"]
+    output_flags: ["-jsonl"]
+    invocation:
+      params:
+        - key: depth
+          kind: integer
+          flag: "-d"
+          default: 2
+          minimum: 1
+          description: Maximum crawl depth from the start URL.
+        - key: js_crawl
+          kind: boolean
+          flag: "-jc"
+          default: true
+          description: Parse and crawl JavaScript source links.
+        - key: headless
+          kind: boolean
+          flag: "-headless"
+          description: Run the crawler in a headless browser.
+  - id: jsluice
+    name: Jsluice
+    domain: web_recon
+    description: JavaScript analysis tool for endpoints and secret-like artifacts.
+    upstream_url: https://github.com/BishopFox/jsluice
+    executable_names: ["jsluice", "jsluice.exe"]
+    version_args: ["-h"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: json
+    adapter_status: implemented
+    risk_notes:
+      - Secret-like matches require manual validation and deduplication.
+    install:
+      method: go
+      package: github.com/BishopFox/jsluice/cmd/jsluice@0ddfab153e060a9eeaded4d8669233f7c071e7e4
+      version: 0ddfab153e060a9eeaded4d8669233f7c071e7e4
+      requires_cgo: true
+      note: Requires a C compiler; Lynceus detects a local compiler or bundled LLVM-MinGW.
+    invocation:
+      params:
+        - key: mode
+          kind: string
+          default: urls
+          description: Extraction subcommand (urls or secrets).
+  - id: dalfox
+    name: Dalfox
+    domain: web_validation
+    description: XSS parameter validation scanner.
+    upstream_url: https://github.com/hahwul/dalfox
+    executable_names: ["dalfox", "dalfox.exe"]
+    version_args: ["--version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: json
+    adapter_status: implemented
+    risk_notes:
+      - Active validation must be bounded and scoped.
+    install:
+      method: github_release
+      repository: hahwul/dalfox
+      release_tag: v3.2.0
+      asset_patterns:
+        windows_amd64: "^dalfox-v3\\.2\\.0-windows-x86_64\\.zip$"
+        linux_amd64: "^dalfox-v3\\.2\\.0-linux-x86_64\\.tar\\.gz$"
+        linux_arm64: "^dalfox-v3\\.2\\.0-linux-aarch64\\.tar\\.gz$"
+        darwin_amd64: "^dalfox-v3\\.2\\.0-macos-x86_64\\.tar\\.gz$"
+        darwin_arm64: "^dalfox-v3\\.2\\.0-macos-aarch64\\.tar\\.gz$"
+      sha256_by_platform:
+        windows_amd64: "04d74c5277df02ad6aa2c969bc33fc9673ff50ca87ee9adc47f4a74e929f43ae"
+        linux_amd64: "1c0539081951ce5f847bd7b62a360fbd4080248502d09a83ce25c5b234f61b8c"
+        linux_arm64: "825678c2b68320838cfa33487de726ffadd46f60ad864938a1a602898c366376"
+        darwin_amd64: "4ac58ed6ab1adb3645cd00bfd03aa1db904df82fee43407256669c4264d5b987"
+        darwin_arm64: "043538aabd396de046d772f39b5c64bd715b2820abb1685e06ae48949ccf44de"
+    target_flag: ["url"]
+    output_flags: ["--format", "json"]
+    invocation:
+      params:
+        - key: parameter
+          kind: string
+          description: Restrict validation to a named parameter.
+        - key: timeout_seconds
+          kind: integer
+          default: 180
+          minimum: 1
+          description: Wall-clock cap for the scan in seconds.
+  - id: crlf
+    name: CRLFsuite
+    domain: web_validation
+    description: CRLF injection validator exposed in single-URL mode.
+    upstream_url: https://github.com/Nefcore/CRLFsuite
+    executable_names: ["crlfsuite", "crlfsuite.exe"]
+    version_args: ["-h"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: text
+    adapter_status: implemented
+    risk_notes:
+      - Active validation must remain within explicit authorization and scope.
+    install:
+      method: pip
+      package: crlfsuite==2.5.2
+      version: 2.5.2
+    target_flag: ["-u"]
+    invocation:
+      params:
+        - key: parameter
+          kind: string
+          description: Restrict validation to a named parameter.
+        - key: timeout_seconds
+          kind: integer
+          default: 180
+          minimum: 1
+          description: Wall-clock cap for the scan in seconds.
+  - id: ffuf
+    name: ffuf
+    domain: content_discovery
+    description: Fast web fuzzer for directory, file, route, and parameter discovery.
+    upstream_url: https://github.com/ffuf/ffuf
+    executable_names: ["ffuf", "ffuf.exe"]
+    version_args: ["-V"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: json
+    adapter_status: implemented
+    risk_notes:
+      - Can generate high request volume; use bounded rate and wordlists.
+    install:
+      method: github_release
+      repository: ffuf/ffuf
+      release_tag: v2.2.1
+      asset_patterns:
+        windows_amd64: "^ffuf_2\\.2\\.1_windows_amd64\\.zip$"
+        linux_amd64: "^ffuf_2\\.2\\.1_linux_amd64\\.tar\\.gz$"
+        linux_arm64: "^ffuf_2\\.2\\.1_linux_arm64\\.tar\\.gz$"
+        darwin_amd64: "^ffuf_2\\.2\\.1_macOS_amd64\\.tar\\.gz$"
+        darwin_arm64: "^ffuf_2\\.2\\.1_macOS_arm64\\.tar\\.gz$"
+      sha256_by_platform:
+        windows_amd64: "717e3d103ee36ce743a18605be66a4424fca27758eebed1e8ebb2eb0a3645589"
+        linux_amd64: "86307885810d3c36ba4a3e9ba5178c2d9027bba0dd7f4ea39e39e7c972b62396"
+        linux_arm64: "89ad4f50345e6a9a48ecc8d241811d582cedf96279276b48d666b12b31260484"
+        darwin_amd64: "ad3c0a141c78213a78ce71a8cd0f2d140d9d9785b9cd44b8fac0d206d65dbb75"
+        darwin_arm64: "b0e9c14a8083fa2e2b52a9a4e004dc132c61347fcda9b4c714fb275ed47c18db"
+    target_flag: ["-u"]
+    invocation:
+      params:
+        - key: wordlist
+          kind: path
+          flag: "-w"
+          required: true
+          description: Path to the fuzzing wordlist file (required).
+        - key: threads
+          kind: integer
+          flag: "-t"
+          default: 20
+          minimum: 1
+          maximum: 100
+          description: Concurrent worker threads.
+        - key: rate
+          kind: integer
+          flag: "-rate"
+          default: 50
+          minimum: 1
+          maximum: 500
+          description: Requests per second cap.
+        - key: extensions
+          kind: string_list
+          flag: "-e"
+          description: File extensions appended to each wordlist entry.
+        - key: status_codes
+          kind: string_list
+          flag: "-mc"
+          description: Status codes to match (comma separated list).
+        - key: filter_status
+          kind: string_list
+          flag: "-fc"
+          description: Status codes to filter out (comma separated list).
+        - key: timeout_seconds
+          kind: integer
+          flag: "-maxtime"
+          default: 300
+          minimum: 1
+          description: Wall-clock cap for the run in seconds.
+  - id: feroxbuster
+    name: feroxbuster
+    domain: content_discovery
+    description: Recursive content discovery tool for web directories and files.
+    upstream_url: https://github.com/epi052/feroxbuster
+    executable_names: ["feroxbuster", "feroxbuster.exe"]
+    version_args: ["--version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: json
+    adapter_status: implemented
+    risk_notes:
+      - Recursive scans must be bounded with concurrency and timeout.
+    install:
+      method: github_release
+      repository: epi052/feroxbuster
+      release_tag: v2.13.1
+      asset_patterns:
+        windows_amd64: "^x86_64-windows-feroxbuster\\.exe\\.zip$"
+        linux_amd64: "^x86_64-linux-feroxbuster\\.zip$"
+        linux_arm64: "^aarch64-linux-feroxbuster\\.zip$"
+        darwin_amd64: "^x86_64-macos-feroxbuster\\.zip$"
+        darwin_arm64: "^aarch64-macos-feroxbuster\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "6255fc1998220833d22b221e5c740895ada2a5fbaf31587e799276c59da7dab2"
+        linux_amd64: "0978619a10049ccaad290b2d1241bc4d8a6aac18da07d6231186fb9d343f99de"
+        linux_arm64: "1e5244e1f52e55a647b65e0c76ae7afe0b9983c1fbea30ed7c67e477175eb381"
+        darwin_amd64: "db50a69896845c0aa1b837c097ff205e3a4bfcca8db1869cb182b57128c132fb"
+        darwin_arm64: "cc5b17041aadd775af5dec60fdd82df8f98ace03a9df5dd84c76792d2294887a"
+    target_flag: ["-u"]
+    invocation:
+      params:
+        - key: wordlist
+          kind: path
+          flag: "--wordlist"
+          required: true
+          description: Path to the fuzzing wordlist file (required).
+        - key: threads
+          kind: integer
+          flag: "--threads"
+          default: 20
+          minimum: 1
+          maximum: 100
+          description: Concurrent worker threads.
+        - key: rate
+          kind: integer
+          flag: "--rate-limit"
+          default: 50
+          minimum: 1
+          maximum: 500
+          description: Requests per second cap.
+        - key: extensions
+          kind: string_list
+          flag: "--extensions"
+          description: File extensions appended to each wordlist entry.
+        - key: status_codes
+          kind: string_list
+          flag: "--status-codes"
+          description: Status codes to match (comma separated list).
+        - key: filter_status
+          kind: string_list
+          flag: "--filter-status"
+          description: Status codes to filter out (comma separated list).
+        - key: timeout_seconds
+          kind: integer
+          flag: "--time-limit"
+          default: 300
+          minimum: 1
+          description: Wall-clock cap for the run in seconds.
+  - id: gobuster
+    name: gobuster
+    domain: content_discovery
+    description: Directory, DNS, vhost, and bucket brute force CLI; Lynceus uses dir mode only.
+    upstream_url: https://github.com/OJ/gobuster
+    executable_names: ["gobuster", "gobuster.exe"]
+    version_args: ["--version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: text
+    adapter_status: implemented
+    risk_notes:
+      - Use dir mode only; arbitrary modes and flags are not exposed.
+    install:
+      method: github_release
+      repository: OJ/gobuster
+      release_tag: v3.8.2
+      asset_patterns:
+        windows_amd64: "^gobuster_Windows_x86_64\\.zip$"
+        linux_amd64: "^gobuster_Linux_x86_64\\.tar\\.gz$"
+        linux_arm64: "^gobuster_Linux_arm64\\.tar\\.gz$"
+        darwin_amd64: "^gobuster_Darwin_x86_64\\.tar\\.gz$"
+        darwin_arm64: "^gobuster_Darwin_arm64\\.tar\\.gz$"
+      sha256_by_platform:
+        windows_amd64: "677abe8e56c5455804225ad2264dc6e9981e99673ef3ccd6a2fa2af8a2e92aba"
+        linux_amd64: "c8a8c6a966eeb011d682a0ef2305a3e3a86b8b3fabe744350c00a766cc0f8021"
+        linux_arm64: "84b175ae5ae770efddb3e675b0e24e56ef0f484a0d751beff0b0629e52c7f4da"
+        darwin_amd64: "f98ff2425bb1fda031556e1459ee86160a539464274a785cb203524fc8121df3"
+        darwin_arm64: "dc37fdfcb67db44e90f54db785218e2ed4ba4fe7552979f9032c6cc8df93d94e"
+    target_flag: ["-u"]
+    invocation:
+      params:
+        - key: wordlist
+          kind: path
+          flag: "--wordlist"
+          required: true
+          description: Path to the fuzzing wordlist file (required).
+        - key: threads
+          kind: integer
+          flag: "--threads"
+          default: 20
+          minimum: 1
+          maximum: 100
+          description: Concurrent worker threads.
+        - key: extensions
+          kind: string_list
+          flag: "--extensions"
+          description: File extensions appended to each wordlist entry.
+        - key: status_codes
+          kind: string_list
+          flag: "--status-codes"
+          description: Status codes to match (comma separated list).
+        - key: filter_status
+          kind: string_list
+          flag: "--status-codes-blacklist"
+          description: Status codes to filter out (comma separated list).
+        - key: timeout_seconds
+          kind: integer
+          default: 300
+          minimum: 1
+          description: Wall-clock cap for the run in seconds.
+  - id: dnsx
+    name: dnsx
+    domain: asset_recon
+    description: DNS toolkit for resolving and enriching domain assets.
+    upstream_url: https://github.com/projectdiscovery/dnsx
+    executable_names: ["dnsx", "dnsx.exe"]
+    version_args: ["-version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: jsonl
+    adapter_status: planned
+    risk_notes:
+      - DNS-only enrichment; no active web validation.
+    install:
+      method: github_release
+      repository: projectdiscovery/dnsx
+      release_tag: v1.3.0
+      asset_patterns:
+        windows_amd64: "^dnsx_.*_windows_amd64\\.zip$"
+        linux_amd64: "^dnsx_.*_linux_amd64\\.zip$"
+        linux_arm64: "^dnsx_.*_linux_arm64\\.zip$"
+        darwin_amd64: "^dnsx_.*_macOS_amd64\\.zip$"
+        darwin_arm64: "^dnsx_.*_macOS_arm64\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "57d96a78674e3e33495e019d84a23d15d25475a13e935bd728c017e82a909cee"
+        linux_amd64: "1415020474886151a4820c62b9e68a315cc062f7f111a2fd13fda99047a809a6"
+        linux_arm64: "94dc2d96aed1ae3e680dc09f070e67e48bd796583b8144c1de5bd3425a318847"
+        darwin_amd64: "3227e23e38f1c4b6cc8fea519aca530f96db6505fcf2bef70f98e988fbed3f95"
+        darwin_arm64: "62c4948638d2cda2365cdda31078e51a64970c5b1359e67235e885d0285962c1"
+  - id: gau
+    name: gau
+    domain: content_discovery
+    description: Fetch known URLs from public historical sources.
+    upstream_url: https://github.com/lc/gau
+    executable_names: ["gau", "gau.exe"]
+    version_args: ["--version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: text
+    adapter_status: planned
+    risk_notes:
+      - Passive OSINT source; results need reachability validation.
+    install:
+      method: github_release
+      repository: lc/gau
+      release_tag: v2.2.4
+      asset_patterns:
+        windows_amd64: "^gau_2\\.2\\.4_windows_amd64\\.zip$"
+        linux_amd64: "^gau_2\\.2\\.4_linux_amd64\\.tar\\.gz$"
+        linux_arm64: "^gau_2\\.2\\.4_linux_arm64\\.tar\\.gz$"
+        darwin_amd64: "^gau_2\\.2\\.4_darwin_amd64\\.tar\\.gz$"
+        darwin_arm64: "^gau_2\\.2\\.4_darwin_arm64\\.tar\\.gz$"
+      sha256_by_platform:
+        windows_amd64: "46eac6d96c9479368d3006191611a33084f177fe4025efed985f40f4b7e51e64"
+        linux_amd64: "10e2e248c37cafb0be3f6d2931125296b95cd4186066d596d47fa417237529a9"
+        linux_arm64: "c194992df360d3a24e021c6dc5a5a0576cfd769be1d19cccb29adc1d3759637d"
+        darwin_amd64: "03431aaa60e3efcd75235fcfa00f410088dfbf9fcc1eacdf39fa5a585090ee39"
+        darwin_arm64: "228b149beaa115f4bccff872bb85c01b7a2a740a01a4cdfb5a2c28950f806ab1"
+  - id: wappalyzergo
+    name: wappalyzergo
+    domain: fingerprint_intelligence
+    description: Wappalyzer technology fingerprinting implementation for Go.
+    upstream_url: https://github.com/projectdiscovery/wappalyzergo
+    executable_names: ["wappalyzergo", "wappalyzergo.exe"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: json
+    adapter_status: implemented
+    risk_notes:
+      - Fingerprints are evidence signals, not exploitability proof.
+    install:
+      method: manual
+      note: >-
+        Upstream ships as a Go library; build the bundled example CLI from
+        https://github.com/projectdiscovery/wappalyzergo and expose it via
+        local-tools.json.
+    target_flag: ["-url"]
+    invocation:
+      params:
+        - key: timeout_seconds
+          kind: integer
+          default: 120
+          minimum: 1
+          description: Wall-clock cap for the run in seconds.
+  - id: EHole
+    name: EHole
+    domain: fingerprint_intelligence
+    description: Fingerprint recognition for web assets and products.
+    upstream_url: https://github.com/EdgeSecurityTeam/EHole
+    executable_names: ["ehole", "EHole", "ehole.exe", "EHole.exe"]
+    version_args: ["-h"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: json
+    adapter_status: implemented
+    risk_notes:
+      - Product fingerprints require corroboration before vulnerability claims.
+    install:
+      method: github_release
+      repository: EdgeSecurityTeam/EHole
+      release_tag: v3.1
+      asset_patterns:
+        windows_amd64: "^EHole_windows_amd64\\.zip$"
+        linux_amd64: "^EHole_linux_amd64\\.zip$"
+        darwin_amd64: "^EHole_darwin_amd64\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "ae4db51d37b56df25444a889f4b2a68c03abbe3092a100ca7094542c2a3158fc"
+        linux_amd64: "177a31f89687b0a1a06d8ff26657139ca1693b9cdffad25d63bf9730fda98d09"
+        darwin_amd64: "d4ab16a5a13d3943251100babd18480263086bbc2194f24905c3a55f546eb581"
+      archive_executable_patterns:
+        windows_amd64: "^EHole_windows_amd64\\.exe$"
+        linux_amd64: "^EHole_linux_amd64$"
+        darwin_amd64: "^EHole_darwin_amd64$"
+      include_archive_files: ["finger.json"]
+    invocation:
+      params:
+        - key: threads
+          kind: integer
+          flag: "-t"
+          minimum: 1
+          description: Concurrent fingerprint probing threads.
+        - key: timeout_seconds
+          kind: integer
+          default: 120
+          minimum: 1
+          description: Wall-clock cap for the run in seconds.
+  - id: afrog
+    name: afrog
+    domain: exploitability_validation
+    description: PoC validation scanner; Lynceus exposes scan-only verification.
+    upstream_url: https://github.com/zan8in/afrog
+    executable_names: ["afrog", "afrog.exe"]
+    version_args: ["-version"]
+    supported_platforms: ["linux", "darwin", "windows"]
+    output_format: json
+    adapter_status: implemented
+    risk_notes:
+      - EXP, shell, command execution, and unsafe actions are not exposed.
+    install:
+      method: github_release
+      repository: zan8in/afrog
+      release_tag: v3.5.6
+      asset_patterns:
+        windows_amd64: "^afrog_.*_windows_amd64\\.zip$"
+        linux_amd64: "^afrog_.*_linux_amd64\\.zip$"
+        linux_arm64: "^afrog_.*_linux_arm64\\.zip$"
+        darwin_amd64: "^afrog_.*_macOS_amd64\\.zip$"
+        darwin_arm64: "^afrog_.*_macOS_arm64\\.zip$"
+      sha256_by_platform:
+        windows_amd64: "0e058b7751bf6dc98844b13984c1c8be135f72a54c0c4ec255e9c806f6224fd2"
+        linux_amd64: "aff990270977e8ae8b0d60fad986ecc4ad43c35833ed99748046d3f5d9e5c8ad"
+        linux_arm64: "5f55202fc5eb3b7d937df827478cd0cefd161ef717b70cbfe693f53d4e364cfe"
+        darwin_amd64: "356cd4df36407642612a184b5b5895b7d9ef3f3f67fc2c06171b0ab7072a13e5"
+        darwin_arm64: "bb3c6065c72b7e93f54492e1326154151bc4c8dc0fd7f4603a28b6f6452d8de0"
+    target_flag: ["-t"]
+    output_flags: ["-json"]
+    invocation:
+      params:
+        - key: severity
+          kind: string_list
+          flag: "-S"
+          description: Severities to include (critical, high, medium, low, info).
+        - key: rate
+          kind: integer
+          flag: "-rate"
+          default: 20
+          minimum: 1
+          maximum: 200
+          description: Requests per second cap.
+        - key: threads
+          kind: integer
+          flag: "-c"
+          default: 10
+          minimum: 1
+          maximum: 50
+          description: Concurrent PoC execution threads.
+        - key: poc_categories
+          kind: string_list
+          flag: "-P"
+          description: PoC category tags restricting executed templates.
+        - key: timeout_seconds
+          kind: integer
+          default: 300
+          minimum: 1
+          description: Wall-clock cap for the run in seconds.

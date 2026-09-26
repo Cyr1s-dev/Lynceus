@@ -1,0 +1,72 @@
+# ---- Workspace state / runtime artifacts ----
+*.sqlite3
+*.sqlite
+*.db
+*.log
+.env
+.env.*
+!.env.example
+
+# ---- Runtime data (generated at run time; sources live under resources/) ----
+/data/
+
+# ---- Editors / OS ----
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+.claude/settings.local.json
+
+# ---- Node ----
+node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# ---- Rust ----
+/build/
+target/
+# Cargo.lock is intentionally committed (application monorepo, reproducible builds).
+
+# ---- Desktop (Tauri) build artifacts ----
+/app/src-tauri/build/
+/app/src-tauri/target/
+
+# ---- AI assistant workspace ----
+.workbuddy-ai/
+
+# ---- Python-era leftovers ----
+.mypy_cache/
+__pycache__/
+*.pyc
+
+# ---- Local agent runtimes & tool scratch dirs (not repo assets) ----
+/agent-dir/
+/ui_example/
+
+# ---- Local agent / tool scratch dirs (created by running CLIs in the repo) ----
+/.pi/
+/.arts/
+/crates/api/data/
+
+# ---- Test-run artifacts ----
+crates/engines/data/
+
+# ---- Security tool default configs ----
+# subfinder / httpx / naabu 等工具首次运行会在工作目录里落默认
+# config.yaml / provider-config.yaml。ToolGateway 现在总是显式设置
+# 子进程 cwd（见 crates/engines/tool_gateway.rs），这些条目只是兜底：
+# 万一又有哪条执行路径漏设 cwd，也绝不会把配置拉进仓库根。
+/subfinder/
+/httpx/
+/naabu/
+/nuclei/
+/dnsx/
+/katana/
+/.uncover-config/
+
+# ---- Misc local scratch ----
+*.tmp
+*.bak
+*.orig
+nohup.out

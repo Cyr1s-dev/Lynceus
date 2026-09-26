@@ -1,0 +1,4 @@
+# Provisioned tool binaries live here but must never be committed.
+*
+!.gitignore
+!README.md

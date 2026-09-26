@@ -1,0 +1,62 @@
+{
+  "version": 1,
+  "description": "Lynceus security-domain alias registry. Ingestion-time and query-time expansion; deterministic. Exact identifiers (CVE-*, CWE-*, privilege names, flags, paths) are intentionally NOT listed here — the tokenizer preserves them verbatim.",
+  "groups": [
+    {
+      "canonical": "sql injection",
+      "terms": ["SQL injection", "SQLi", "SQL注入", "SQL 注入", "union injection", "联合查询注入"]
+    },
+    {
+      "canonical": "remote code execution",
+      "terms": ["remote code execution", "RCE", "远程代码执行", "命令执行", "代码执行"]
+    },
+    {
+      "canonical": "privilege escalation",
+      "terms": ["privilege escalation", "privesc", "提权", "权限提升", "local privilege escalation", "EoP"]
+    },
+    {
+      "canonical": "lateral movement",
+      "terms": ["lateral movement", "横向移动", "内网横向", "横向渗透", "pivot"]
+    },
+    {
+      "canonical": "reverse shell",
+      "terms": ["reverse shell", "反弹 shell", "反弹shell", "反向连接", "backconnect"]
+    },
+    {
+      "canonical": "bind shell",
+      "terms": ["bind shell", "绑定 shell", "正向连接"]
+    },
+    {
+      "canonical": "directory traversal",
+      "terms": ["directory traversal", "path traversal", "目录穿越", "路径穿越", "目录遍历", "LFI", "local file inclusion", "本地文件包含", "任意文件读取"]
+    },
+    {
+      "canonical": "command injection",
+      "terms": ["command injection", "OS command injection", "命令注入"]
+    },
+    {
+      "canonical": "server-side request forgery",
+      "terms": ["server-side request forgery", "SSRF", "服务端请求伪造", "内网请求伪造"]
+    },
+    {
+      "canonical": "cross-site scripting",
+      "terms": ["cross-site scripting", "XSS", "跨站脚本", "脚本注入"]
+    },
+    {
+      "canonical": "file upload",
+      "terms": ["file upload", "unrestricted file upload", "remote file upload", "文件上传", "任意文件上传", "上传漏洞"]
+    },
+    {
+      "canonical": "insecure deserialization",
+      "terms": ["insecure deserialization", "deserialization", "反序列化", "序列化漏洞"]
+    },
+    {
+      "canonical": "authentication bypass",
+      "terms": ["authentication bypass", "auth bypass", "鉴权绕过", "认证绕过", "未授权访问"]
+    },
+    {
+      "canonical": "credential access",
+      "terms": ["credential access", "credential dumping", "凭据获取", "凭据转储", "密码抓取"]
+    }
+  ]
+}

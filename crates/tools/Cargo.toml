@@ -1,0 +1,25 @@
+[package]
+name = "tools"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+models.workspace = true
+storage.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "knowledge-import"
+path = "bin/knowledge-import.rs"
+
+[lints]
+workspace = true

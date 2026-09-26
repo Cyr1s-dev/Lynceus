@@ -1,0 +1,59 @@
+[package]
+name = "engines"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+tracing.workspace = true
+models.workspace = true
+storage.workspace = true
+agents.workspace = true
+roxmltree.workspace = true
+base64.workspace = true
+csv.workspace = true
+evidence.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+indexmap.workspace = true
+sha2.workspace = true
+thiserror.workspace = true
+async-trait.workspace = true
+regex.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+tokio = { workspace = true, features = ["rt", "rt-multi-thread", "macros", "net", "io-util", "time", "sync", "process"] }
+# ReceiverStream：流式生成经 mpsc 通道桥接（后台任务持有全部可变状态，
+# 审计落库在任务收尾单点完成）。
+tokio-stream = { version = "0.1", features = ["sync"] }
+# lynceus-mcp：Streamable HTTP MCP server 直接挂 api 进程 /mcp（复用 axum 0.8）
+axum = { workspace = true }
+# rustls 而非 native-tls：M9 的 RISC-V/ARM64 musl 交叉构建不依赖系统
+# OpenSSL；json/stream 为网关请求与 SSE 正文所需。
+reqwest = { version = "0.12", default-features = false, features = ["json", "stream", "rustls-tls"] }
+url = "2"
+glob.workspace = true
+ignore.workspace = true
+portable-pty.workspace = true
+zip = { version = "8.6.0", default-features = false, features = ["deflate"] }
+# GitHub release 资产进程内解压：zip（Windows 及部分 linux 资产）+ tar.gz
+# （dalfox/ffuf/gobuster 的 linux/darwin 资产）。纯 Rust，无 shell 外调。
+flate2 = "1"
+tar = "0.4"
+rcgen = { version = "0.14.10", features = ["x509-parser"] }
+hyper = { version = "1.11.1", features = ["http1", "server"] }
+hyper-util = { version = "0.1.20", features = ["server", "http1", "tokio"] }
+tokio-rustls = { version = "0.26.5", features = ["ring"] }
+http-body-util = "0.1.5"
+rustls = { version = "0.23.45", features = ["ring"] }
+rusqlite = { workspace = true, features = ["bundled"] }
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[lints]
+workspace = true

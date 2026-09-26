@@ -1,0 +1,29 @@
+[package]
+name = "intelligence"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+models.workspace = true
+storage.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+async-trait.workspace = true
+chrono.workspace = true
+url.workspace = true
+futures-util.workspace = true
+tokio = { workspace = true, features = ["io-util", "macros", "net", "rt", "time"] }
+# rustls 而非 native-tls：与 engines 的网关选型一致（交叉构建不依赖
+# 系统 OpenSSL）；json 为 source 响应解析所需。
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+[dev-dependencies]
+tempfile.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[lints]
+workspace = true

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Lynceus",
+  "version": "0.1.0",
+  "identifier": "com.lynceus.desktop",
+  "build": {
+    "beforeDevCommand": "powershell -ExecutionPolicy Bypass -File ../../scripts/build-local.ps1 -Profile debug -NoRestart && npm --prefix ../frontend run dev",
+    "beforeBuildCommand": "powershell -ExecutionPolicy Bypass -File ../../scripts/build-local.ps1 -Profile release -NoRestart && npm --prefix ../frontend run build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../../frontend/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Lynceus",
+        "width": 1440,
+        "height": 900,
+        "minWidth": 1024,
+        "minHeight": 640,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "category": "Utility",
+    "resources": {
+      "../../build/release/api.exe": "bin/api.exe",
+      "../../resources": "resources"
+    },
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico", "icons/icon.png"],
+    "shortDescription": "Auditable agent-driven security review workspace",
+    "longDescription": "Lynceus desktop shell for the Rust audit engine and existing web frontend"
+  }
+}

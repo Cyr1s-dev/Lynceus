@@ -1,0 +1,87 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/models",
+    "crates/storage",
+    "crates/evidence",
+    "crates/agents",
+    "crates/runtime",
+    "crates/engines",
+    "crates/api",
+    "crates/diff",
+    "crates/tools",
+    "crates/intelligence",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace.dependencies]
+models = { path = "crates/models" }
+storage = { path = "crates/storage" }
+evidence = { path = "crates/evidence" }
+agents = { path = "crates/agents" }
+runtime = { path = "crates/runtime" }
+engines = { path = "crates/engines" }
+api = { path = "crates/api" }
+intelligence = { path = "crates/intelligence" }
+roxmltree = "0.20"
+base64 = "0.22"
+csv = "1"
+
+serde = { version = "1", features = ["derive"] }
+# preserve_order：serde_json::Map 保持插入序（IndexMap），镜像 Python dict 的
+# 键序语义——payload 逐字节对拍要求嵌套 JSON 对象的键序不得被重排为字母序。
+serde_json = { version = "1", features = ["preserve_order"] }
+serde_yaml = "0.9"
+indexmap = { version = "2", features = ["serde"] }
+rusqlite = { version = "0.37", features = ["bundled"] }
+sha2 = "0.10"
+thiserror = "2"
+proptest = "1"
+tempfile = "3"
+chrono = { version = "0.4", default-features = false, features = ["std", "clock"] }
+unicode-normalization = "0.1"
+url = "2"
+uuid = { version = "1", features = ["v4"] }
+async-trait = "0.1"
+# axum：api HTTP 层 + engines 内 lynceus-mcp Streamable HTTP server（/mcp）。
+axum = { version = "0.8", features = ["json", "macros", "multipart", "ws"] }
+tokio = { version = "1", features = ["sync", "rt", "macros", "net", "time", "process"] }
+futures-util = "0.3"
+# regex：critique/metacognition 的断言式与猜想式短语检测是 Python `re`
+# 正则的 1:1 移植（\b 边界 + alternation），手写匹配器易错且难与 Python
+# 语义对齐，故引入正则引擎。
+regex = "1"
+# tracing：可审计平台的裁决日志（MGATE 裁决、证据门失败、分支生成）。
+tracing = "0.1"
+# glob：workspace_glob 的有界文件枚举（max_results 截断，绝不无限枚举）。
+glob = "0.3"
+# ignore：workspace_grep 的目录遍历（尊重 .gitignore、二进制文件跳过、
+# 隐藏文件控制），与 ripgrep 同源的遍历语义。
+ignore = "0.4"
+# portable-pty：terminal_session 的跨平台 PTY（Windows ConPTY / Unix
+# openpty），GDB/pwndbg/python REPL 等交互程序的持久会话载体。
+portable-pty = "0.8"
+
+# 可执行的工程规范。测试代码在 crate 根用
+# #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))] 显式豁免。
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+print_stdout = "deny"
+
+[profile.release]
+lto = "thin"
+strip = "debuginfo"

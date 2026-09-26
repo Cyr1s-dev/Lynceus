@@ -1,0 +1,18 @@
+[package]
+name = "lynceus-desktop"
+version = "0.1.0"
+description = "Lynceus desktop shell"
+authors = ["Lynceus"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]
+
+# 独立工作区：桌面壳不进主 Rust workspace（tauri-cli 需要独立 metadata 根）。
+[workspace]

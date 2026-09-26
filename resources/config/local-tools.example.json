@@ -1,0 +1,76 @@
+{
+  "local_tools": [
+    {
+      "name": "Semgrep",
+      "tool_name": "semgrep",
+      "domain": "web_sast",
+      "executable_path": "C:\\Tools\\Semgrep\\semgrep.exe",
+      "version_args": ["--version"],
+      "capability": "web_sast.semgrep.scan"
+    },
+    {
+      "name": "Nuclei",
+      "tool_name": "nuclei",
+      "domain": "web_dast",
+      "executable_path": "C:\\Tools\\Nuclei\\nuclei.exe",
+      "version_args": ["-version"],
+      "capability": "web_dast.nuclei.scan"
+    },
+    {
+      "name": "Subfinder",
+      "tool_name": "subfinder",
+      "domain": "asset_recon",
+      "executable_path": "C:\\Tools\\Subfinder\\subfinder.exe",
+      "version_args": ["-version"],
+      "capability": "asset_recon.subfinder.scan"
+    },
+    {
+      "name": "Naabu",
+      "tool_name": "naabu",
+      "domain": "asset_recon",
+      "executable_path": "C:\\Tools\\Naabu\\naabu.exe",
+      "version_args": ["-version"],
+      "capability": "asset_recon.naabu.scan"
+    },
+    {
+      "name": "Httpx",
+      "tool_name": "httpx",
+      "domain": "asset_recon",
+      "executable_path": "C:\\Tools\\Httpx\\httpx.exe",
+      "version_args": ["-version"],
+      "capability": "asset_recon.httpx.scan"
+    },
+    {
+      "name": "Katana",
+      "tool_name": "katana",
+      "domain": "web_recon",
+      "executable_path": "C:\\Tools\\Katana\\katana.exe",
+      "version_args": ["-version"],
+      "capability": "web_recon.katana.scan"
+    },
+    {
+      "name": "Jsluice",
+      "tool_name": "jsluice",
+      "domain": "web_recon",
+      "executable_path": "C:\\Tools\\Jsluice\\jsluice.exe",
+      "version_args": ["-h"],
+      "capability": "web_recon.jsluice.scan"
+    },
+    {
+      "name": "Dalfox",
+      "tool_name": "dalfox",
+      "domain": "web_validation",
+      "executable_path": "C:\\Tools\\Dalfox\\dalfox.exe",
+      "version_args": ["--version"],
+      "capability": "web_validation.dalfox.scan"
+    },
+    {
+      "name": "Crlfsuite",
+      "tool_name": "crlf",
+      "domain": "web_validation",
+      "executable_path": "C:\\Tools\\Crlfsuite\\crlfsuite.exe",
+      "version_args": ["-h"],
+      "capability": "web_validation.crlf.scan"
+    }
+  ]
+}

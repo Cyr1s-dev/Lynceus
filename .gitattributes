@@ -1,0 +1,22 @@
+# Normalize line endings to LF in the repository and in every working tree,
+# so the Rust workspace, React frontend and scripts behave identically on
+# Windows, macOS and Linux.
+* text=auto eol=lf
+
+# Windows batch scripts must keep CRLF line endings.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets: never normalize, never diff as text.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.icns binary
+*.zip binary
+*.7z binary
+*.pdf binary
+*.woff binary
+*.woff2 binary

@@ -1,0 +1,42 @@
+[package]
+name = "api"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+axum = { version = "0.8", features = ["json", "macros", "multipart", "ws"] }
+models.workspace = true
+intelligence.workspace = true
+storage.workspace = true
+evidence.workspace = true
+agents.workspace = true
+runtime.workspace = true
+engines.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+tokio.workspace = true
+futures-util.workspace = true
+regex.workspace = true
+uuid.workspace = true
+url.workspace = true
+tokio-stream = { version = "0.1", features = ["sync"] }
+tower-http = { version = "0.6", features = ["cors"] }
+thiserror.workspace = true
+unicode-normalization.workspace = true
+
+[dev-dependencies]
+async-trait.workspace = true
+tower = "0.5"
+tempfile.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "api"
+path = "main.rs"
+
+[lints]
+workspace = true

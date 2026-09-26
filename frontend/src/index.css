@@ -1,0 +1,306 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Light-first canvas: cold near-white, not pure white ── */
+    --background: 210 20% 98%;           /* #F7F9FB */
+    --foreground: 222 47% 11%;           /* deep slate ink */
+
+    --card: 0 0% 100%;                   /* pure white surfaces */
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    /* Primary — cleaner brand blue (Stripe/Linear light) */
+    --primary: 221 83% 53%;              /* #2563EB */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 16% 96%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 16% 96%;                /* #F4F6F8 */
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 16% 96%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 72% 46%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Hairline borders — visible but quiet */
+    --border: 214 20% 92%;               /* #E6EAF0 */
+    --border-strong: 214 18% 86%;
+    --input: 214 20% 90%;
+    --ring: 221 83% 53%;
+
+    /* Slightly larger radius for modern light SaaS */
+    --radius: 0.75rem;                   /* 12px */
+
+    /* ── Semantic status tokens (soft tint + deep text) ── */
+    --success: 142 71% 35%;
+    --success-soft: 142 60% 95%;
+    --success-soft-foreground: 142 65% 26%;
+    --success-border: 142 50% 88%;
+
+    --info: 221 83% 53%;
+    --info-soft: 214 95% 97%;
+    --info-soft-foreground: 221 60% 38%;
+    --info-border: 214 80% 90%;
+
+    --warning: 32 95% 40%;
+    --warning-soft: 40 100% 96%;
+    --warning-soft-foreground: 32 80% 28%;
+    --warning-border: 40 80% 88%;
+
+    --danger: 0 72% 46%;
+    --danger-soft: 0 86% 97%;
+    --danger-soft-foreground: 0 70% 35%;
+    --danger-border: 0 80% 90%;
+
+    --neutral: 215 16% 47%;
+    --neutral-soft: 210 16% 96%;
+    --neutral-soft-foreground: 215 19% 35%;
+    --neutral-border: 214 20% 92%;
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 63% 40%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 20%;
+    --border-strong: 217 28% 28%;
+    --input: 217 33% 20%;
+    --ring: 217 91% 60%;
+
+    --success: 142 71% 45%;
+    --success-soft: 142 40% 15%;
+    --success-soft-foreground: 142 50% 65%;
+    --success-border: 142 30% 25%;
+
+    --info: 217 91% 60%;
+    --info-soft: 217 40% 15%;
+    --info-soft-foreground: 217 50% 65%;
+    --info-border: 217 30% 25%;
+
+    --warning: 38 92% 50%;
+    --warning-soft: 38 40% 15%;
+    --warning-soft-foreground: 38 50% 65%;
+    --warning-border: 38 30% 25%;
+
+    --danger: 0 72% 51%;
+    --danger-soft: 0 40% 15%;
+    --danger-soft-foreground: 0 50% 65%;
+    --danger-border: 0 30% 25%;
+
+    --neutral: 215 16% 47%;
+    --neutral-soft: 217 20% 14%;
+    --neutral-soft-foreground: 215 15% 60%;
+    --neutral-border: 217 20% 22%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-feature-settings: "cv11", "ss01", "ss03";
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  }
+
+  /*
+   * Prevent native / browser focus flashes on command-style inputs.
+   * Keep focus ring paint-only so light theme never dips into a dark fill.
+   */
+  input,
+  textarea,
+  select {
+    outline: none;
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: none;
+  }
+
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: hsl(var(--foreground));
+    transition: background-color 99999s ease-in-out 0s;
+    box-shadow: 0 0 0px 1000px hsl(var(--card)) inset;
+  }
+
+  /*
+   * Interactive hover text stability.
+   * Prefer paint-only transitions on buttons/tabs (see Button/Tabs components).
+   * Avoid GPU translateZ hacks here — they blur text on Windows fractional DPR.
+   */
+  button,
+  [role="button"] {
+    text-rendering: geometricPrecision;
+  }
+
+  /* Tabular numbers for data-heavy surfaces */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Mono for IDs / hashes / code */
+  .font-mono {
+    font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+      Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+}
+
+@layer components {
+  /* Surface helpers — prefer these over ad-hoc slate utilities */
+  .surface-card {
+    @apply rounded-xl border border-border bg-card shadow-card;
+  }
+
+  .surface-muted {
+    @apply rounded-xl border border-border bg-muted/60;
+  }
+
+  .surface-inset {
+    @apply rounded-lg border border-border bg-muted/40;
+  }
+
+  /* Page rhythm */
+  .page-stack {
+    @apply flex flex-col gap-6;
+  }
+
+  .section-stack {
+    @apply flex flex-col gap-4;
+  }
+
+  /* Spec / metadata label */
+  .label-spec {
+    @apply text-[11px] font-medium uppercase tracking-wide text-muted-foreground;
+  }
+
+  /* Interactive lift used by cards — paint-only to avoid text subpixel jitter */
+  .lift {
+    @apply transition-[box-shadow,background-color,border-color,opacity] duration-150 ease-out;
+  }
+
+  .lift:hover {
+    @apply shadow-elev;
+  }
+
+  /* Soft focus ring for command-style inputs */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/20 focus-visible:border-primary;
+  }
+}
+
+@layer utilities {
+  /* Skeleton shimmer for loading states */
+  .animate-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .animate-shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      hsl(var(--background) / 0.7),
+      transparent
+    );
+    animation: shimmer 1.4s infinite;
+  }
+
+  /* Live status pulse (running missions) */
+  .status-live {
+    position: relative;
+  }
+
+  .status-live::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 9999px;
+    background: hsl(var(--info) / 0.35);
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer::after,
+  .status-live::before,
+  .lift {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
+

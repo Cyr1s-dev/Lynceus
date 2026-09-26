@@ -1,0 +1,61 @@
+- Goal -
+Given a private security-research knowledge base document, extract a high-quality
+knowledge graph of entities and relationships.
+
+- Strict Rules (quality over coverage) -
+1. Extract ONLY entities and relationships explicitly supported by the text.
+2. DO NOT translate entity names. Preserve them in their original language.
+3. DO NOT normalize entity names. Keep original casing, punctuation, and form.
+4. DO NOT rewrite API names, error codes, file paths, URLs, code symbols,
+   product names, CVE/CWE identifiers, or version strings. Preserve verbatim.
+5. DO NOT create duplicate translated entities. Each real-world thing has one
+   entity with its original name.
+6. Never invent entities, relationships, or attributes not present in the text.
+7. Prefer precision over recall: when uncertain, omit.
+
+- Entity Types (use exactly one) -
+PERSON, ORGANIZATION, TEAM, PRODUCT, SYSTEM, COMPONENT, API, DATABASE, DATASET,
+DOCUMENT, REQUIREMENT, POLICY, PROCEDURE, INCIDENT, ERROR_CODE, CONCEPT,
+VULNERABILITY, CWE, CVE, TOOL, TECHNIQUE, ARTIFACT
+
+- Relationship Types (use exactly one) -
+owns, depends_on, implements, configures, calls, stores, produces, consumes,
+mitigates, causes, affects, requires, conflicts_with, supersedes, documents,
+reports, belongs_to, exploits, detects, validates, patches
+
+- Relationship Strength -
+Assign each relationship an integer strength from 1 (weak/incidental) to 10
+(strong/critical), based on how directly the text supports it.
+
+- Output Format -
+Return a single JSON object with this shape (no markdown, no prose):
+
+{
+  "entities": [
+    {"name": "<verbatim original name>", "type": "<ENTITY_TYPE>", "description": "<short, factual>"}
+  ],
+  "relationships": [
+    {
+      "source": "<verbatim entity name>",
+      "target": "<verbatim entity name>",
+      "type": "<RELATIONSHIP_TYPE>",
+      "strength": <1-10>,
+      "description": "<short, factual>"
+    }
+  ]
+}
+
+- Examples -
+Input: "The /api/v2/login endpoint calls auth_svc.validate() and returns
+ERROR_AUTH_1001 when the token is expired. CVE-2024-1234 describes a bypass
+fixed in patch v2.3.1."
+Entities:
+  - {"name": "/api/v2/login", "type": "API", ...}
+  - {"name": "auth_svc.validate()", "type": "COMPONENT", ...}
+  - {"name": "ERROR_AUTH_1001", "type": "ERROR_CODE", ...}
+  - {"name": "CVE-2024-1234", "type": "CVE", ...}
+  - {"name": "patch v2.3.1", "type": "ARTIFACT", ...}
+Relationships:
+  - {source: "/api/v2/login", target: "auth_svc.validate()", type: "calls", strength: 9}
+  - {source: "/api/v2/login", target: "ERROR_AUTH_1001", type: "produces", strength: 8}
+  - {source: "CVE-2024-1234", target: "patch v2.3.1", type: "mitigates", strength: 9}

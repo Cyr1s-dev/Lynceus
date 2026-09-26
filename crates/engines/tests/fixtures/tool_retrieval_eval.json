@@ -1,0 +1,84 @@
+{
+  "cases": [
+    {
+      "name": "pure knowledge question retrieves no tools",
+      "text": "what is ASLR and how does it work",
+      "artifact_kinds": [],
+      "explicit_tools": [],
+      "relevant": [],
+      "expect_no_tools": true
+    },
+    {
+      "name": "analyze an ELF binary",
+      "text": "inspect native binary metadata and protections perform static binary analysis",
+      "artifact_kinds": ["elf"],
+      "explicit_tools": [],
+      "relevant": ["ida_mcp"]
+    },
+    {
+      "name": "explicit nuclei request wins",
+      "text": "use nuclei to scan this site",
+      "artifact_kinds": ["url"],
+      "explicit_tools": ["nuclei"],
+      "relevant": ["nuclei"],
+      "explicit_expect": "nuclei"
+    },
+    {
+      "name": "explicit IDA request on an ELF",
+      "text": "用 IDA 看一下这个 ELF",
+      "artifact_kinds": ["elf"],
+      "explicit_tools": ["ida"],
+      "relevant": ["ida_mcp"],
+      "explicit_expect": "ida_mcp"
+    },
+    {
+      "name": "hidden endpoint discovery on a URL",
+      "text": "find hidden endpoints and discover web content on this url",
+      "artifact_kinds": ["url"],
+      "explicit_tools": [],
+      "relevant": ["ffuf", "feroxbuster", "gobuster"]
+    },
+    {
+      "name": "packet capture analysis",
+      "text": "analyze packet capture and extract network streams",
+      "artifact_kinds": ["pcap"],
+      "explicit_tools": [],
+      "relevant": ["traffic_artifact_import"]
+    },
+    {
+      "name": "source code vulnerability scan",
+      "text": "scan source code for vulnerabilities",
+      "artifact_kinds": ["source"],
+      "explicit_tools": [],
+      "relevant": ["semgrep"]
+    },
+    {
+      "name": "subdomain enumeration",
+      "text": "enumerate subdomains and external assets",
+      "artifact_kinds": ["domain"],
+      "explicit_tools": [],
+      "relevant": ["subfinder", "dnsx"]
+    },
+    {
+      "name": "IDA decompilation inspection",
+      "text": "inspect ida decompilation and disassembly of the binary",
+      "artifact_kinds": ["elf"],
+      "explicit_tools": [],
+      "relevant": ["ida_mcp"]
+    },
+    {
+      "name": "web technology fingerprinting",
+      "text": "web technology fingerprinting and service identification",
+      "artifact_kinds": ["url"],
+      "explicit_tools": [],
+      "relevant": ["wappalyzergo", "ehole", "native_fingerprint"]
+    },
+    {
+      "name": "web vulnerability scanning",
+      "text": "web vulnerability scanning with templates",
+      "artifact_kinds": ["url"],
+      "explicit_tools": [],
+      "relevant": ["nuclei", "afrog"]
+    }
+  ]
+}
